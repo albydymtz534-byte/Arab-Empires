@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arab Empires | أسياد العرب</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101820;color:#fff;
+ font-family:Arial,sans-serif;
+}
+header{
+ background:#172a35;padding:20px;
+ text-align:center;border-bottom:2px solid #d9aa42;
+}
+h1{color:#e8bd58;margin:0}
+.stats{
+ display:flex;justify-content:space-around;
+ background:#203640;padding:15px;
+ flex-wrap:wrap;gap:10px;
+}
+.stat{color:#f3d16b}
+main{padding:15px}
+.card{
+ background:#1c2c36;border:1px solid #42535c;
+ border-radius:12px;padding:15px;margin-bottom:15px;
+}
+select,button{
+ width:100%;padding:13px;margin-top:10px;
+ border-radius:8px;border:none;font-size:16px;
+}
+select{background:#fff;color:#111}
+button{
+ background:#d6a83f;color:#111;
+ font-weight:bold;cursor:pointer;
+}
+button:active{transform:scale(.98)}
+.map{
+ display:grid;grid-template-columns:repeat(3,1fr);
+ gap:8px;margin-top:15px;
+}
+.country{
+ background:#263e49;border:1px solid #d6a83f;
+ padding:15px 5px;border-radius:8px;
+ text-align:center;cursor:pointer;
+}
+.country:hover{background:#405965}
+.log{
+ background:#101820;padding:10px;
+ border-radius:8px;min-height:50px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>👑 Arab Empires</h1>
+<p>أسياد العرب — لعبة استراتيجية</p>
+</header>
+
+<div class="stats">
+<div>💰 الذهب: <span class="stat" id="gold">1000</span></div>
+<div>🛢️ النفط: <span class="stat" id="oil">500</span></div>
+<div>🌾 الغذاء: <span class="stat" id="food">800</span></div>
+<div>🏙️ المدن: <span class="stat" id="cities">1</span></div>
+</div>
+
+<main>
+
+<div class="card">
+<h2>🌍 اختر دولتك</h2>
+<select id="country">
+<option>اليمن</option>
+<option>السعودية</option>
+<option>مصر</option>
+<option>العراق</option>
+<option>سوريا</option>
+<option>الأردن</option>
+<option>فلسطين</option>
+<option>لبنان</option>
+<option>عُمان</option>
+<option>الإمارات</option>
+<option>قطر</option>
+<option>الكويت</option>
+<option>البحرين</option>
+<option>الجزائر</option>
+<option>المغرب</option>
+<option>تونس</option>
+<option>ليبيا</option>
+<option>السودان</option>
+<option>موريتانيا</option>
+<option>الصومال</option>
+<option>جيبوتي</option>
+<option>جزر القمر</option>
+</select>
+<button onclick="chooseCountry()">👑 تأسيس الدولة</button>
+<h3 id="king">لم يتم تأسيس الدولة</h3>
+</div>
+
+<div class="card">
+<h2>🏗️ تطوير الدولة</h2>
+<button onclick="build()">🏙️ بناء مدينة — 200 ذهب</button>
+<button onclick="upgrade()">🏰 تطوير العاصمة — 300 ذهب</button>
+<button onclick="economy()">📈 تطوير الاقتصاد — 150 ذهب</button>
+</div>
+
+<div class="card">
+<h2>🗺️ خريطة الدول العربية</h2>
+<p>اضغط على دولة لاستعراضها</p>
+<div class="map" id="map"></div>
+</div>
+
+<div class="card">
+<h2>📜 أخبار الدولة</h2>
+<div class="log" id="log">مرحبًا بك أيها الحاكم!</div>
+</div>
+
+</main>
+
+<script>
+let gold=1000,oil=500,food=800,cities=1;
+let selected="";
+
+const countries=[
+"🇾🇪 اليمن","🇸🇦 السعودية","🇪🇬 مصر","🇮🇶 العراق",
+"🇸🇾 سوريا","🇯🇴 الأردن","🇵🇸 فلسطين","🇱🇧 لبنان",
+"🇴🇲 عُمان","🇦🇪 الإمارات","🇶🇦 قطر","🇰🇼 الكويت",
+"🇧🇭 البحرين","🇩🇿 الجزائر","🇲🇦 المغرب","🇹🇳 تونس",
+"🇱🇾 ليبيا","🇸🇩 السودان","🇲🇷 موريتانيا",
+"🇸🇴 الصومال","🇩🇯 جيبوتي","🇰🇲 جزر القمر"
+];
+
+function update(){
+ document.getElementById("gold").textContent=gold;
+ document.getElementById("oil").textContent=oil;
+ document.getElementById("food").textContent=food;
+ document.getElementById("cities").textContent=cities;
+}
+
+function message(text){
+ document.getElementById("log").textContent=text;
+}
+
+function chooseCountry(){
+ selected=document.getElementById("country").value;
+ document.getElementById("king").textContent=
+ "👑 حاكم دولة "+selected;
+ message("تم تأسيس دولة "+selected+" بنجاح!");
+}
+
+function build(){
+ if(gold>=200){
+ gold-=200;cities++;
+ update();message("تم بناء مدينة جديدة!");
+ }else message("لا يوجد ذهب كافٍ!");
+}
+
+function upgrade(){
+ if(gold>=300){
+ gold-=300;update();
+ message("تم تطوير العاصمة!");
+ }else message("تحتاج إلى 300 ذهب!");
+}
+
+function economy(){
+ if(gold>=150){
+ gold-=150;oil+=100;food+=100;
+ update();message("ازدهر اقتصاد الدولة!");
+ }else message("لا يوجد ذهب كافٍ!");
+}
+
+countries.forEach(c=>{
+ let div=document.createElement("div");
+ div.className="country";
+ div.textContent=c;
+ div.onclick=()=>message("الدولة المحددة: "+c);
+ document.getElementById("map").appendChild(div);
+});
+
+setInterval(()=>{
+ gold+=10;oil+=5;food+=5;update();
+},10000);
+
+update();
+</script>
+
+</body>
+  </html>
