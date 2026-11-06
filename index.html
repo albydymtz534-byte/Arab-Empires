@@ -15,60 +15,62 @@ body{
 header{
  height:65px;background:#151d25;
  border-bottom:2px solid #d2a83e;
- display:flex;align-items:center;justify-content:space-around;
- gap:5px;padding:5px
+ display:flex;align-items:center;justify-content:space-between;
+ gap:5px;padding:5px 10px
 }
-.logo{color:#e9c35e;font-weight:bold;font-size:17px;direction:ltr}
-.resources{display:flex;gap:7px;flex-wrap:wrap}
+.logo{color:#e9c35e;font-weight:bold;font-size:15px;direction:ltr}
+.resources{display:flex;gap:5px;flex-wrap:wrap}
 .resource{
  background:#26313b;border:1px solid #a78131;
- border-radius:7px;padding:7px;font-size:13px
+ border-radius:5px;padding:5px;font-size:11px
 }
 .resource b{color:#f5d578}
+.top-menu{display:flex;gap:5px}
+.top-menu button{
+ background:#26313b;border:1px solid #d2a83e;
+ color:#f5d578;padding:5px 8px;font-size:11px;margin:0;width:auto
+}
 #map{height:calc(100vh - 65px);width:100%;background:#152b3c}
 .leaflet-container{background:#152b3c}
 .leaflet-tooltip{
  background:#171b20;color:#ffe18b;
- border:1px solid #d6ad50;font-weight:bold
+ border:1px solid #d6ad50;font-weight:bold;font-size:10px
 }
-#countryPanel{
+#countryPanel, #modalPanel{
  position:absolute;bottom:15px;right:15px;z-index:1000;
  background:#151d25;border:2px solid #c49a3b;
- border-radius:10px;padding:15px;width:260px;
+ border-radius:10px;padding:12px;width:270px;
  display:none;box-shadow:0 4px 20px #000
 }
-#countryPanel h3{color:#f3d276;margin:0 0 5px}
+#countryPanel h3, #modalPanel h3{color:#f3d276;margin:0 0 5px;font-size:14px}
 .building-stats{
- font-size: 11px; margin: 6px 0; color: #d4af37;
- background: #1b242d; padding: 5px; border-radius: 5px;
+ font-size: 11px; margin: 5px 0; color: #d4af37;
+ background: #1b242d; padding: 4px; border-radius: 5px;
  border: 1px solid #5a451d; text-align: center;
 }
 button{
  background:#74551b;color:white;border:1px solid #e0b84f;
- border-radius:6px;padding:7px;margin-top:5px;
- width:100%;cursor:pointer;font-size:12px
+ border-radius:6px;padding:6px;margin-top:4px;
+ width:100%;cursor:pointer;font-size:11px
 }
 button:hover{background:#a77b24}
 #message{
  position:absolute;bottom:15px;left:15px;z-index:1000;
  background:#151d25;border:1px solid #c49a3b;
- padding:10px;border-radius:7px;font-size:12px
+ padding:8px;border-radius:7px;font-size:11px;max-width:280px
 }
 .arab-country-label {
     background: #17120c;
     border: 1px solid #e8bd55;
     color: #ffe29a;
     font-weight: bold;
-    font-size: 11px;
-    padding: 3px 5px;
-    border-radius: 5px;
-    box-shadow: 0 1px 5px #000;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 4px;
 }
-@media(max-width:500px){
- header{height:75px;flex-direction:column}
- .logo{font-size:14px}
- .resource{padding:4px;font-size:11px}
- #map{height:calc(100vh - 75px)}
+@media(max-width:600px){
+ header{height:auto;flex-direction:column;padding:5px}
+ #map{height:calc(100vh - 100px)}
 }
 </style>
 </head>
@@ -78,32 +80,53 @@ button:hover{background:#a77b24}
 <header>
  <div class="logo">THE LAST EMPIRE 👑</div>
  <div class="resources">
-  <div class="resource">💰 المال: <b id="money">10000</b></div>
-  <div class="resource">🛢️ النفط: <b id="oil">5000</b></div>
-  <div class="resource">🪵 الخشب: <b id="wood">5000</b></div>
-  <div class="resource">⛓️ الحديد: <b id="iron">5000</b></div>
-  <div class="resource">⚔️ الجنود: <b id="soldiers">0</b></div>
+  <div class="resource">💰 <b id="money">10000</b></div>
+  <div class="resource">🛢️ <b id="oil">5000</b></div>
+  <div class="resource">🪵 <b id="wood">5000</b></div>
+  <div class="resource">⛓️ <b id="iron">5000</b></div>
+  <div class="resource">⚔️ <b id="soldiers">0</b></div>
+ </div>
+ <div class="top-menu">
+  <button onclick="openModal('allies')">🤝 التحالفات</button>
+  <button onclick="openModal('commanders')">⭐ القادة</button>
+  <button onclick="openCapital()">🏛️ العاصمة</button>
+  <button onclick="toggleMusic()" id="musicBtn">🎵 موسيقى</button>
  </div>
 </header>
 
 <div id="map"></div>
 
+<!-- لوحة الدولة والمناطق -->
 <div id="countryPanel">
  <h3 id="countryName">الدولة</h3>
- <div style="font-size: 12px; color: #aaa;">👑 دولة الإمبراطورية</div>
+ <div id="countryStatus" style="font-size: 11px; color: #aaa;">👑 منطقة مستقلة</div>
+ <div class="building-stats" id="regionResourceInfo">مورد المنطقة المميز: -</div>
  <div class="building-stats">
-  🌾 المزارع: <span id="farmCount">0</span> | 
-  🏭 المصانع: <span id="factoryCount">0</span> | 
-  🏰 القواعد: <span id="baseCount">0</span>
+  🌾 مزارع: <span id="farmCount">0</span> | 
+  🏭 مصانع: <span id="factoryCount">0</span> | 
+  🏰 قواعد: <span id="baseCount">0</span>
  </div>
- <button onclick="build('farm')">🌾 بناء مزرعة (500 💰)</button>
- <button onclick="build('factory')">🏭 بناء مصنع (1200 💰)</button>
- <button onclick="build('base')">🏰 بناء قاعدة (2000 💰)</button>
- <button onclick="buttonRecruit()" style="background:#2d5a3d; border-color:#52a871;">⚔️ تجنيد جيش (200 💰 + 100 ⛓️)</button>
- <button onclick="closePanel()" style="background:#5a2d2d; border-color:#a85252;">إغلاق</button>
+ <div id="managementControls" style="display:none;">
+  <button onclick="build('farm')">🌾 بناء مزرعة (500 💰)</button>
+  <button onclick="build('factory')">🏭 بناء مصنع (1200 💰)</button>
+  <button onclick="build('base')">🏰 بناء قاعدة (2000 💰)</button>
+ </div>
+ <button onclick="buttonRecruit()" style="background:#2d5a3d; border-color:#52a871;">⚔️ تجنيد 50 جندي (200 💰 + 100 ⛓️)</button>
+ <button id="conquerBtn" onclick="conquerCountry()" style="background:#8a2e2e; border-color:#d46a6a;">🛡️ غزو واحتلال المنطقة (تتطلب 100 جندي)</button>
+ <button onclick="closePanel()" style="background:#333; border-color:#555;">إغلاق</button>
 </div>
 
-<div id="message">🗺️ اضغط على دولة لاختيارها</div>
+<!-- نافذة عامة (التحالفات، القادة، العاصمة) -->
+<div id="modalPanel">
+ <h3 id="modalTitle">عنوان</h3>
+ <div id="modalBody" style="font-size:12px; margin: 10px 0; max-height: 150px; overflow-y:auto;">محتوى</div>
+ <button onclick="closeModal()">إغلاق</button>
+</div>
+
+<div id="message">🗺️ اضغط على أي دولة أو منطقة لإدارتها وغزوها</div>
+
+<!-- مشغل الموسيقى المخفي -->
+<audio id="bgMusic" loop src="https://actions.google.com/sounds/v1/ambiences/space_drone.ogg"></audio>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -111,6 +134,7 @@ const map = L.map("map", { zoomControl: true }).setView([25, 35], 4);
 
 let selectedLayer = null;
 let selectedCountry = "";
+let musicPlaying = false;
 
 let resources = {
     money: 10000,
@@ -120,11 +144,7 @@ let resources = {
     soldiers: 0
 };
 
-let buildings = {
-    farm: 0,
-    factory: 0,
-    base: 0
-};
+let empireData = {};
 
 const countries = {
     DZA: "الجزائر", BHR: "البحرين", COM: "جزر القمر",
@@ -136,54 +156,110 @@ const countries = {
     TUN: "تونس", ARE: "الإمارات", YEM: "اليمن"
 };
 
+// موارد مخصصة لكل دولة/منطقة
+const regionBonuses = {
+    "الجزائر": { type: "oil", name: "🛢️ نفط وفير" },
+    "السعودية": { type: "oil", name: "🛢️ نفط ضخم" },
+    "الإمارات": { type: "money", name: "💰 مركز مالي" },
+    "العراق": { type: "oil", name: "🛢️ حقول نفطية" },
+    "مصر": { type: "wood", name: "🌾 أراضي زراعية واسعة" },
+    "السودان": { type: "wood", name: "🌾 زراعة كبرى" },
+    "المغرب": { type: "iron", name: "⛓️ مناجم حديد" },
+    "عُمان": { type: "iron", name: "⛓️ حديد خام" }
+};
+
+function getCountryData(name) {
+    if (!empireData[name]) {
+        empireData[name] = {
+            farm: 0,
+            factory: 0,
+            base: 0,
+            conquered: false,
+            bonus: regionBonuses[name] || { type: "money", name: "💰 تجارة محلية" }
+        };
+    }
+    return empireData[name];
+}
+
 function chooseCountry(name, layer) {
     if (selectedLayer) {
-        geoLayer.resetStyle(selectedLayer);
+        const prevName = selectedLayer.feature ? countries[selectedLayer.feature.properties.ISO_A3 || selectedLayer.feature.properties.ADM0_A3 || selectedLayer.feature.properties.SOV_A3 || selectedLayer.feature.properties["ISO3166-1-Alpha-3"]] : "";
+        const prevData = prevName ? getCountryData(prevName) : null;
+        selectedLayer.setStyle({ fillColor: (prevData && prevData.conquered) ? "#2e6b39" : "#315d55", fillOpacity: 0.8, weight: 1.5 });
     }
+    
     selectedLayer = layer;
     selectedCountry = name;
-    layer.setStyle({ fillColor: "#e4b83e", fillOpacity: 0.95, weight: 3 });
+    
+    const data = getCountryData(name);
+    
+    layer.setStyle({ fillColor: data.conquered ? "#45b649" : "#e4b83e", fillOpacity: 0.95, weight: 3 });
     document.getElementById("countryName").textContent = "👑 " + name;
+    document.getElementById("regionResourceInfo").textContent = "مورد المنطقة: " + data.bonus.name;
+    
+    const statusEl = document.getElementById("countryStatus");
+    const controlsEl = document.getElementById("managementControls");
+    const conquerBtn = document.getElementById("conquerBtn");
+
+    if (data.conquered) {
+        statusEl.textContent = "🟢 محتلة ومنضمة لإمبراطوريتك";
+        controlsEl.style.display = "block";
+        conquerBtn.style.display = "none";
+    } else {
+        statusEl.textContent = "⚠️ منطقة محايدة (تحتاج غزو للسيطرة)";
+        controlsEl.style.display = "none";
+        conquerBtn.style.display = "block";
+    }
+
     document.getElementById("countryPanel").style.display = "block";
+    document.getElementById("modalPanel").style.display = "none";
     document.getElementById("message").textContent = "الدولة المختارة: " + name;
+    
     updateBuildingCounts();
     saveGame();
 }
 
 function closePanel() {
     document.getElementById("countryPanel").style.display = "none";
+    if (selectedLayer) {
+        const data = getCountryData(selectedCountry);
+        selectedLayer.setStyle({ fillColor: data.conquered ? "#2e6b39" : "#315d55", fillOpacity: 0.8, weight: 1.5 });
+        selectedLayer = null;
+        selectedCountry = "";
+    }
 }
 
 function updateBuildingCounts() {
-    document.getElementById("farmCount").textContent = buildings.farm;
-    document.getElementById("factoryCount").textContent = buildings.factory;
-    document.getElementById("baseCount").textContent = buildings.base;
+    if (!selectedCountry) return;
+    const data = getCountryData(selectedCountry);
+    document.getElementById("farmCount").textContent = data.farm;
+    document.getElementById("factoryCount").textContent = data.factory;
+    document.getElementById("baseCount").textContent = data.base;
 }
 
 function updateResources() {
-    document.getElementById("money").textContent = resources.money.toLocaleString();
-    document.getElementById("oil").textContent = resources.oil.toLocaleString();
-    document.getElementById("wood").textContent = resources.wood.toLocaleString();
-    document.getElementById("iron").textContent = resources.iron.toLocaleString();
+    document.getElementById("money").textContent = Math.floor(resources.money).toLocaleString();
+    document.getElementById("oil").textContent = Math.floor(resources.oil).toLocaleString();
+    document.getElementById("wood").textContent = Math.floor(resources.wood).toLocaleString();
+    document.getElementById("iron").textContent.textContent = Math.floor(resources.iron).toLocaleString();
+    document.getElementById("iron").textContent = Math.floor(resources.iron).toLocaleString();
     document.getElementById("soldiers").textContent = resources.soldiers.toLocaleString();
     updateBuildingCounts();
 }
 
 function saveGame() {
-    localStorage.setItem("lastEmpire", JSON.stringify({
+    localStorage.setItem("lastEmpireGameAdvanced", JSON.stringify({
         resources,
-        selectedCountry,
-        buildings
+        empireData
     }));
 }
 
 function loadGame() {
     try {
-        const saved = JSON.parse(localStorage.getItem("lastEmpire"));
+        const saved = JSON.parse(localStorage.getItem("lastEmpireGameAdvanced"));
         if (saved) {
             if (saved.resources) resources = saved.resources;
-            selectedCountry = saved.selectedCountry || "";
-            if (saved.buildings) buildings = saved.buildings;
+            if (saved.empireData) empireData = saved.empireData;
         }
     } catch (e) {}
     updateResources();
@@ -192,12 +268,7 @@ function loadGame() {
 loadGame();
 
 let geoLayer = null;
-
-const countryColors = [
-    "#315d55", "#76503b", "#355c78",
-    "#694b72", "#80632b", "#526b39"
-];
-
+const countryColors = ["#315d55", "#76503b", "#355c78", "#694b72", "#80632b", "#526b39"];
 const geoUrl = "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson";
 
 fetch(geoUrl)
@@ -216,11 +287,13 @@ fetch(geoUrl)
         style: feature => {
             const p = feature.properties;
             const code = p.ISO_A3 || p.ADM0_A3 || p.SOV_A3 || p["ISO3166-1-Alpha-3"];
-            const index = Object.keys(countries).indexOf(code);
+            const name = countries[code];
+            const data = empireData[name];
+            
             return {
                 color: "#e9c66b",
                 weight: 1.5,
-                fillColor: countryColors[index % countryColors.length],
+                fillColor: (data && data.conquered) ? "#2e6b39" : countryColors[Object.keys(countries).indexOf(code) % countryColors.length],
                 fillOpacity: 0.8
             };
         },
@@ -239,17 +312,18 @@ fetch(geoUrl)
 
             layer.on("mouseover", function() {
                 if (selectedLayer !== this) {
-                    this.setStyle({
-                        fillColor: "#e8bd55",
-                        fillOpacity: 1,
-                        weight: 2.5
-                    });
+                    this.setStyle({ fillColor: "#e8bd55", fillOpacity: 1, weight: 2.5 });
                 }
             });
 
             layer.on("mouseout", function() {
                 if (selectedLayer !== this) {
-                    geoLayer.resetStyle(this);
+                    const data = getCountryData(name);
+                    this.setStyle({
+                        fillColor: data.conquered ? "#2e6b39" : countryColors[Object.keys(countries).indexOf(code) % countryColors.length],
+                        fillOpacity: 0.8,
+                        weight: 1.5
+                    });
                 }
             });
 
@@ -259,19 +333,7 @@ fetch(geoUrl)
         }
     }).addTo(map);
 
-    map.fitBounds(geoLayer.getBounds(), {
-        padding: [20, 20]
-    });
-
-    if (selectedCountry) {
-        geoLayer.eachLayer(layer => {
-            const p = layer.feature.properties;
-            const code = p.ISO_A3 || p.ADM0_A3 || p.SOV_A3 || p["ISO3166-1-Alpha-3"];
-            if (countries[code] === selectedCountry) {
-                chooseCountry(selectedCountry, layer);
-            }
-        });
-    }
+    map.fitBounds(geoLayer.getBounds(), { padding: [20, 20] });
 })
 .catch(error => {
     console.error(error);
@@ -279,8 +341,10 @@ fetch(geoUrl)
 });
 
 function build(type) {
-    if (!selectedCountry) {
-        alert("اختر دولة أولاً!");
+    if (!selectedCountry) return;
+    const data = getCountryData(selectedCountry);
+    if (!data.conquered) {
+        alert("يجب غزو المنطقة أولاً!");
         return;
     }
 
@@ -290,12 +354,7 @@ function build(type) {
         base: { money: 2000, wood: 300, iron: 500, oil: 100 }
     };
 
-    const names = {
-        farm: "مزرعة",
-        factory: "مصنع",
-        base: "قاعدة عسكرية"
-    };
-
+    const names = { farm: "مزرعة", factory: "مصنع", base: "قاعدة عسكرية" };
     const cost = costs[type];
 
     for (const res in cost) {
@@ -309,25 +368,13 @@ function build(type) {
         resources[res] -= cost[res];
     }
 
-    buildings[type]++;
-
+    data[type]++;
     updateResources();
     saveGame();
-
     alert("تم بناء " + names[type] + " في " + selectedCountry);
 }
 
 function buttonRecruit() {
-    if (!selectedCountry) {
-        alert("اختر دولة أولاً!");
-        return;
-    }
-    
-    if (buildings.base === 0) {
-        alert("تحتاج إلى بناء قاعدة عسكرية أولاً لتتمكن من تجنيد الجنود!");
-        return;
-    }
-
     if (resources.money >= 200 && resources.iron >= 100) {
         resources.money -= 200;
         resources.iron -= 100;
@@ -336,15 +383,122 @@ function buttonRecruit() {
         saveGame();
         alert("تم تجنيد 50 جندياً بنجاح!");
     } else {
-        alert("الموارد غير كافية للتجنيد (تحتاج 200 مال و 100 حديد)");
+        alert("الموارد غير كافية (تحتاج 200 مال و 100 حديد)");
     }
 }
 
+function conquerCountry() {
+    if (!selectedCountry) return;
+    const data = getCountryData(selectedCountry);
+    
+    if (resources.soldiers < 100) {
+        alert("تحتاج إلى 100 جندي على الأقل لشن هجوم!");
+        return;
+    }
+
+    resources.soldiers -= 100;
+    data.conquered = true;
+    resources.money += 3000;
+    
+    if (selectedLayer) {
+        selectedLayer.setStyle({ fillColor: "#45b649", fillOpacity: 0.95 });
+    }
+
+    document.getElementById("countryStatus").textContent = "🟢 محتلة ومنضمة لإمبراطوريتك";
+    document.getElementById("managementControls").style.display = "block";
+    document.getElementById("conquerBtn").style.display = "none";
+
+    updateResources();
+    saveGame();
+    alert("🎉 تهانينا! تم السيطرة على " + selectedCountry + " بنجاح!");
+}
+
+// نظام النوافذ العامة (التحالفات والقادة)
+function openModal(type) {
+    document.getElementById("countryPanel").style.display = "none";
+    const title = document.getElementById("modalTitle");
+    const body = document.getElementById("modalBody");
+    
+    if (type === 'allies') {
+        title.textContent = "🤝 التحالفات الدولية";
+        body.innerHTML = "تحالف الشرق: نشط (+10% إنتاج مال)<br>معاهدة التجارة الحرة: مفعلة";
+    } else if (type === 'commanders') {
+        title.textContent = "⭐ إدارة القادة والدعم";
+        body.innerHTML = "القائد العام: صقر الصحراء<br>المهارة: تسريع تدريب الجنود بنسبة 15%<br><button onclick='supportCommander()' style='margin-top:5px; background:#45b649;'>دعم القائد بـ 500 مال</button>";
+    }
+    
+    document.getElementById("modalPanel").style.display = "block";
+}
+
+function supportCommander() {
+    if (resources.money >= 500) {
+        resources.money -= 500;
+        updateResources();
+        alert("تم دعم القائد بنجاح وزادت ولاءات الجيش!");
+    } else {
+        alert("المال غير كافٍ لدعم القائد!");
+    }
+}
+
+// عاصمة الترفيه
+function openCapital() {
+    document.getElementById("countryPanel").style.display = "none";
+    const title = document.getElementById("modalTitle");
+    const body = document.getElementById("modalBody");
+    
+    title.textContent = "🏛️ عاصمة الإمبراطورية (الترفيه)";
+    body.innerHTML = "مرحباً بك في العاصمة الكبرى. يمكنك هنا إقامة الفعاليات لرفع معنويات الشعب وتعزيز الاقتصاد.<br><button onclick='entertainCapital()' style='margin-top:8px; background:#d2a83e; color:#000; font-weight:bold;'>🎉 تنظيم مهرجان (التكلفة: 1000 مال)</button>";
+    
+    document.getElementById("modalPanel").style.display = "block";
+}
+
+function entertainCapital() {
+    if (resources.money >= 1000) {
+        resources.money -= 1000;
+        resources.oil += 200;
+        resources.wood += 200;
+        updateResources();
+        alert("🎉 أقيم مهرجان عظيم في العاصمة! ارتفعت المعنويات وحصلت على موارد إضافية.");
+    } else {
+        alert("المال غير كافٍ لتنظيم المهرجان!");
+    }
+}
+
+function closeModal() {
+    document.getElementById("modalPanel").style.display = "none";
+}
+
+// تشغيل وإيقاف الموسيقى
+function toggleMusic() {
+    const music = document.getElementById("bgMusic");
+    const btn = document.getElementById("musicBtn");
+    if (musicPlaying) {
+        music.pause();
+        musicPlaying = false;
+        btn.textContent = "🎵 موسيقى (مغلقة)";
+    } else {
+        music.play().catch(() => {});
+        musicPlaying = true;
+        btn.textContent = "🔊 موسيقى (تعمل)";
+    }
+}
+
+// الإنتاج التلقائي
 setInterval(() => {
-    resources.money += 20 + buildings.factory * 15;
-    resources.oil += 10;
-    resources.wood += 10 + buildings.farm * 5;
-    resources.iron += 5 + buildings.factory * 5;
+    let totalFarms = 0;
+    let totalFactories = 0;
+    let conqueredCount = 0;
+
+    for (let c in empireData) {
+        totalFarms += empireData[c].farm;
+        totalFactories += empireData[c].factory;
+        if (empireData[c].conquered) conqueredCount++;
+    }
+
+    resources.money += 30 + (totalFactories * 20) + (conqueredCount * 40);
+    resources.oil += 15 + (conqueredCount * 5);
+    resources.wood += 10 + (totalFarms * 5);
+    resources.iron += 5 + (totalFactories * 5);
 
     updateResources();
     saveGame();
