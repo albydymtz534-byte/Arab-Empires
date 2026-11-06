@@ -4,9 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THE LAST EMPIRE - الإمبراطورية الأخيرة</title>
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
+        :root {
+            --bg-main: #0a0a0c;
+            --bg-panel: #141419;
+            --border-color: #2a2a35;
+            --accent-gold: #f39c12;
+            --accent-red: #e74c3c;
+            --accent-blue: #3498db;
+            --text-main: #ecf0f1;
+            --text-muted: #95a5a6;
+        }
         * {
             box-sizing: border-box;
             margin: 0;
@@ -14,151 +23,199 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         body {
-            background-color: #121212;
-            color: #ffffff;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
-        /* الشريط العلوي المتقدم */
+        /* الشريط العلوي الفخم */
         #top-bar {
-            background-color: #1e1e1e;
-            border-bottom: 2px solid #333;
-            padding: 10px 20px;
+            background: linear-gradient(to bottom, #1a1a24, #101017);
+            border-bottom: 2px solid var(--accent-gold);
+            padding: 12px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
             z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
         }
         .resources-group, .stats-group {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
         }
         .resource-item, .stat-item {
-            background: #2c2c2c;
-            padding: 5px 12px;
-            border-radius: 6px;
+            background: rgba(20, 20, 25, 0.8);
+            padding: 8px 14px;
+            border-radius: 8px;
             font-size: 14px;
-            border: 1px solid #444;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .resource-item span {
+            color: var(--accent-gold);
         }
         .action-btn {
-            background: #d9534f;
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
             color: white;
             border: none;
-            padding: 6px 14px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
         }
         .action-btn:hover {
-            background: #c9302c;
+            background: linear-gradient(135deg, #d9534f, #c0392b);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.5);
         }
-        /* تخطيط المحتوى الرئيسي */
+        /* التخطيط الرئيسي */
         #main-container {
             display: flex;
             flex: 1;
             position: relative;
         }
-        /* اللوحة الجانبية للتحكم والترقيات */
+        /* اللوحة الجانبية الفخمة */
         #sidebar {
-            width: 320px;
-            background: #181818;
-            border-left: 2px solid #333;
+            width: 350px;
+            background: var(--bg-panel);
+            border-left: 2px solid var(--border-color);
             padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 20px;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.5);
         }
         .panel-section {
-            background: #222;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #3a3a3a;
+            background: #1a1a22;
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s;
+        }
+        .panel-section:hover {
+            border-color: #3a3a4a;
         }
         .panel-section h3 {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-size: 16px;
-            color: #f0ad4e;
-            border-bottom: 1px solid #444;
-            padding-bottom: 5px;
+            color: var(--accent-gold);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .upgrade-card {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 10px;
-            background: #2a2a2a;
-            padding: 8px 10px;
-            border-radius: 5px;
+            margin-top: 12px;
+            background: #121217;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #22222d;
         }
-        /* خريطة اللعبة */
+        .upgrade-card span {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .small-btn {
+            background: linear-gradient(135deg, #d35400, #e67e22);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .small-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+        /* الخريطة */
         #map {
             flex: 1;
             height: 100%;
-            background: #000;
+            background: #050507;
+        }
+        /* تخصيص نصوص المنبثقة للخريطة */
+        .leaflet-popup-content-wrapper {
+            background: #1a1a24;
+            color: #fff;
+            border: 1px solid var(--accent-gold);
+            border-radius: 8px;
+        }
+        .leaflet-popup-tip {
+            background: #1a1a24;
         }
     </style>
 </head>
 <body>
 
-    <!-- الشريط العلوي للإحصائيات والموارد -->
+    <!-- الشريط العلوي الفخم -->
     <div id="top-bar">
         <div class="resources-group">
-            <div class="resource-item">💰 المال: <span id="res-gold">5000</span></div>
-            <div class="resource-item">🛢️ النفط: <span id="res-oil">1200</span></div>
-            <div class="resource-item">⚙️ الحديد: <span id="res-iron">800</span></div>
-            <div class="resource-item">🪵 الخشب: <span id="res-wood">1500</span></div>
+            <div class="resource-item">💰 المال: <span id="res-gold">8500</span></div>
+            <div class="resource-item">🛢️ النفط: <span id="res-oil">3400</span></div>
+            <div class="resource-item">⚙️ الحديد: <span id="res-iron">2100</span></div>
+            <div class="resource-item">🪵 الخشب: <span id="res-wood">4000</span></div>
         </div>
         <div class="stats-group">
-            <div class="stat-item">🎖️ القوة العسكرية: <span id="stat-power">3400</span></div>
-            <div class="stat-item">✈️ القوات الجوية: <span id="stat-airforce">120</span></div>
+            <div class="stat-item">🎖️ القوة: <span id="stat-power">7400</span></div>
+            <div class="stat-item">✈️ الجوية: <span id="stat-airforce">350</span></div>
             <button class="action-btn" onclick="openAlliance()">التحالفات</button>
-            <button class="action-btn" onclick="openLeaders()">القادة</button>
+            <button class="action-btn" onclick="openLeaders()">غرفة القادة</button>
         </div>
     </div>
 
-    <!-- المحتوى الرئيسي (الخريطة واللوحة الجانبية) -->
+    <!-- المحتوى الرئيسي -->
     <div id="main-container">
         <div id="map"></div>
         
         <div id="sidebar">
             <div class="panel-section">
-                <h3>🏛️ العاصمة والمنشآت</h3>
-                <p>مستوى القصر: <span id="palace-level">1</span></p>
+                <h3>🏛️ العاصمة الإمبراطورية</h3>
+                <p style="font-size: 14px; margin-bottom: 8px;">مستوى القصر الملكي: <b id="palace-level" style="color: var(--accent-gold);">2</b></p>
                 <div class="upgrade-card">
-                    <span>ترقية القصر (500 مال)</span>
-                    <button class="action-btn" onclick="upgradePalace()">ترقية</button>
+                    <span>ترقية القصر (+500 قوة)</span>
+                    <button class="small-btn" onclick="upgradePalace()">ترقية (1000 مال)</button>
                 </div>
             </div>
 
             <div class="panel-section">
-                <h3>✈️ القوات الجوية والمطارات</h3>
-                <p>المطارات النشطة: <span id="airport-count">1</span></p>
+                <h3>✈️ قيادة القوات الجوية</h3>
+                <p style="font-size: 14px; margin-bottom: 8px;">المطارات النشطة: <b id="airport-count" style="color: var(--accent-blue);">2</b></p>
                 <div class="upgrade-card">
-                    <span>إنشاء مطار جديد (800 نفط)</span>
-                    <button class="action-btn" onclick="buildAirport()">بناء</button>
+                    <span>إنشاء مطار حربي</span>
+                    <button class="small-btn" onclick="buildAirport()">بناء (600 نفط)</button>
                 </div>
             </div>
 
             <div class="panel-section">
-                <h3>📍 تفاصيل المنطقة المحددة</h3>
-                <p id="selected-region">اختر محافظة من الخريطة لعرض التفاصيل...</p>
+                <h3>📍 رادار العمليات الميدانية</h3>
+                <p id="selected-region" style="font-size: 13px; color: var(--text-muted);">اختر محافظة من الخريطة لعرض التقارير الاستخباراتية وتحليل السيطرة...</p>
             </div>
         </div>
     </div>
 
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // تهيئة المتغيرات الأساسية للموارد والقوة
-        let resources = { gold: 5000, oil: 1200, iron: 800, wood: 1500 };
-        let stats = { power: 3400, airforce: 120, palaceLvl: 1, airports: 1 };
+        let resources = { gold: 8500, oil: 3400, iron: 2100, wood: 4000 };
+        let stats = { power: 7400, airforce: 350, palaceLvl: 2, airports: 2 };
 
         function updateUI() {
             document.getElementById('res-gold').innerText = resources.gold;
@@ -171,70 +228,70 @@
             document.getElementById('airport-count').innerText = stats.airports;
         }
 
-        // إعداد خريطة اللعبة التفاعلية
-        const map = L.map('map').setView([15.5527, 48.5164], 6);
+        // خريطة داكنة وفخمة
+        const map = L.map('map', { zoomControl: false }).setView([15.5527, 48.5164], 6);
+        L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; THE LAST EMPIRE',
+            attribution: '&copy; THE LAST EMPIRE - Ultimate Edition',
             maxZoom: 12,
             minZoom: 5
         }).addTo(map);
 
-        // إضافة محافظات افتراضية على الخريطة (مثال تمثيلي للمحافظات)
         const regions = [
-            { name: "العاصمة المركزية", coords: [15.3694, 44.1910], color: "#d9534f", control: "سيطرة تامة" },
-            { name: "محافظة الشمال", coords: [16.8550, 43.5500], color: "#f0ad4e", control: "منطقة متنازع عليها" },
-            { name: "محافظة الشرق", coords: [15.9680, 48.7900], color: "#5cb85c", control: "تحت السيطرة" },
-            { name: "محافظة الجنوب", coords: [12.7937, 45.0351], color: "#0275d8", control: "منطقة استراتيجية" }
+            { name: "العاصمة الملكية المركزية", coords: [15.3694, 44.1910], color: "#e74c3c", control: "سيطرة مطلقة للإمبراطورية" },
+            { name: "محافظة الشمال الاستراتيجية", coords: [16.8550, 43.5500], color: "#f39c12", control: "منطقة نزاع ومواجهات" },
+            { name: "محافظة الشرق الاقتصادية", coords: [15.9680, 48.7900], color: "#2ecc71", control: "مؤمنة بالكامل - إنتاج موارد" },
+            { name: "محافظة الجنوب الساحلية", coords: [12.7937, 45.0351], color: "#3498db", control: "قاعدة بحرية وجوية رئيسية" }
         ];
 
         regions.forEach(reg => {
             const circle = L.circleMarker(reg.coords, {
-                radius: 12,
-                color: reg.color,
+                radius: 14,
+                color: '#fff',
+                weight: 2,
                 fillColor: reg.color,
-                fillOpacity: 0.8
+                fillOpacity: 0.9
             }).addTo(map);
 
-            circle.bindPopup(`<b>${reg.name}</b><br>الحالة: ${reg.control}`);
+            circle.bindPopup(`<b>${reg.name}</b><br><span style="color: #bbb;">الحالة:</span> ${reg.control}`);
             
             circle.on('click', () => {
-                document.getElementById('selected-region').innerHTML = `<b>${reg.name}</b><br>الحالة العسكرية: ${reg.control}`;
+                document.getElementById('selected-region').innerHTML = `<b style="color:var(--accent-gold);">${reg.name}</b><br><span style="color:var(--text-muted);">الحالة العسكرية:</span> ${reg.control}`;
             });
         });
 
-        // وظائف الترقية والبناء
         function upgradePalace() {
-            if (resources.gold >= 500) {
-                resources.gold -= 500;
+            if (resources.gold >= 1000) {
+                resources.gold -= 1000;
                 stats.palaceLvl++;
-                stats.power += 300;
+                stats.power += 500;
                 updateUI();
-                alert("تم ترقية القصر بنجاح!");
+                alert("✨ تم ترقية القصر الملكي بنجاح! ارتفعت هيبة الإمبراطورية.");
             } else {
-                alert("الموارد غير كافية (تحتاج 500 مال)!");
+                alert("⚠️ المنجم يفتقر للمال الكافي (تحتاج 1000 مال)!");
             }
         }
 
         function buildAirport() {
-            if (resources.oil >= 800) {
-                resources.oil -= 800;
+            if (resources.oil >= 600) {
+                resources.oil -= 600;
                 stats.airports++;
-                stats.airforce += 50;
-                stats.power += 250;
+                stats.airforce += 120;
+                stats.power += 350;
                 updateUI();
-                alert("تم إنشاء مطار عسكري جديد وتفعيل طائرات إضافية!");
+                alert("✈️ تم تدشين مطار حربي جديد وانضمام سرب طائرات حديث!");
             } else {
-                alert("النفط غير كافٍ (تحتاج 800 نفط)!");
+                alert("⚠️ مخزون النفط غير كافٍ لتشغيل المطار (تحتاج 600 نفط)!");
             }
         }
 
         function openAlliance() {
-            alert("قائمة التحالفات: يمكنك عقد معاهدات أو إعلان حروب.");
+            alert("🌐 شاشات التحالفات: مفاوضات مع الحلفاء وعقد معاهدات الهيمنة الكبرى.");
         }
 
         function openLeaders() {
-            alert("إدارة القادة: تعيين القادة لتعزيز كفاءة القوات الجوية والجيش.");
+            alert("🎖️ قاعة القادة العسكريين: استدعاء كبار الضباط لتوجيه الأسراب الجوية والجيوش.");
         }
 
         updateUI();
