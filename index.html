@@ -2,8 +2,12 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>أسياد العرب | Arab Empires</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE LAST EMPIRE</title>
+
+<!-- مكتبة الخريطة -->
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
 * {
@@ -12,167 +16,211 @@
 
 body {
     margin: 0;
+    background: #090d13;
+    color: #f5e7bd;
     font-family: Tahoma, Arial, sans-serif;
-    background: #101923;
-    color: #fff;
 }
 
 header {
+    background: linear-gradient(120deg,#17120b,#30220c,#100d08);
+    border-bottom: 2px solid #c69b38;
+    padding: 18px 12px;
     text-align: center;
-    padding: 25px 10px;
-    background: linear-gradient(120deg,#142d3a,#18583f);
-    border-bottom: 3px solid #d9ad43;
 }
 
 header h1 {
-    color: #f3c65b;
-    margin: 0;
+    color: #e8bd55;
     font-size: 30px;
+    letter-spacing: 3px;
+    margin: 5px;
+    direction: ltr;
 }
 
 header p {
-    color: #d7e3dc;
+    color: #c9b88c;
+    margin: 8px 0 0;
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: #111923;
+    border-bottom: 1px solid #70551e;
+}
+
+nav button,
+.action-button {
+    background: #292014;
+    border: 1px solid #b68b32;
+    color: #f5d88e;
+    padding: 10px 16px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+nav button:hover,
+.action-button:hover {
+    background: #72501a;
+    color: white;
 }
 
 .container {
-    width: 95%;
-    max-width: 1150px;
-    margin: 20px auto;
+    padding: 12px;
+    max-width: 1500px;
+    margin: auto;
 }
 
-h2 {
-    color: #f3c65b;
-    font-size: 20px;
-    border-bottom: 1px solid #40515d;
-    padding-bottom: 10px;
+.section-title {
+    color: #e8bd55;
+    border-right: 4px solid #c69b38;
+    padding-right: 10px;
+    margin: 20px 0 12px;
 }
 
 .resources {
     display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
+    grid-template-columns: repeat(auto-fit,minmax(135px,1fr));
     gap: 10px;
 }
 
-.resource, .panel {
-    background: #1c2d3a;
-    border: 1px solid #40515d;
-    border-radius: 12px;
-    padding: 15px;
-}
-
 .resource {
+    background: linear-gradient(145deg,#1b2632,#101720);
+    border: 1px solid #655020;
+    border-radius: 9px;
+    padding: 12px 8px;
     text-align: center;
+    min-height: 83px;
 }
 
-.resource span {
-    display: block;
-    color: #f3c65b;
-    font-size: 22px;
+.resource .icon {
+    font-size: 23px;
+}
+
+.resource .name {
+    color: #cdbb91;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.resource .amount {
+    color: #f4d47e;
+    font-size: 18px;
     font-weight: bold;
-    margin-top: 8px;
+    margin-top: 5px;
 }
 
-.layout {
+.main-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
-    gap: 15px;
-    margin-top: 18px;
+    grid-template-columns: minmax(0,1fr) 280px;
+    gap: 12px;
+    margin-top: 15px;
 }
 
 .panel {
-    margin-bottom: 15px;
+    background: #121b25;
+    border: 1px solid #665020;
+    border-radius: 10px;
+    padding: 13px;
+    min-width: 0;
 }
 
-button, select {
+#map {
     width: 100%;
-    padding: 12px;
-    margin: 6px 0;
-    border: 0;
+    height: 520px;
+    background: #101c29;
+    border: 1px solid #8b6b2b;
     border-radius: 8px;
-    font-size: 15px;
+    z-index: 1;
 }
 
-button {
-    background: #d6aa42;
-    color: #17212a;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #f1ca68;
-}
-
-button:disabled {
-    opacity: .5;
-    cursor: not-allowed;
-}
-
-select {
-    background: #263e4e;
-    color: white;
-    border: 1px solid #657b89;
-}
-
-.item {
-    background: #263e4e;
-    border-radius: 8px;
-    padding: 11px;
+.map-note {
+    color: #b9ad91;
+    font-size: 12px;
     margin: 8px 0;
 }
 
-.item strong {
-    color: #f3c65b;
-}
-
-.map {
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
-    gap: 8px;
-    margin-top: 12px;
-}
-
-.country {
-    background: #245b48;
-    color: white;
-    border: 1px solid #65a17f;
-    min-height: 65px;
-}
-
-.country.selected {
-    background: #d6aa42;
-    color: #17212a;
-    border: 2px solid white;
-}
-
-#log {
-    background: #101923;
-    padding: 12px;
+.country-info {
+    background: #1b2631;
+    border: 1px solid #715824;
     border-radius: 8px;
-    max-height: 200px;
-    overflow-y: auto;
+    padding: 13px;
+    margin-top: 12px;
+    line-height: 2;
 }
 
-.log-entry {
-    padding: 8px;
-    border-bottom: 1px solid #344957;
-    font-size: 14px;
+.country-info h3 {
+    color: #e8bd55;
+    margin-top: 0;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #34404a;
+    padding: 6px 0;
+}
+
+.side-button {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    background: #252014;
+    color: #f4d47e;
+    border: 1px solid #856526;
+    padding: 11px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.side-button:hover {
+    background: #554019;
+}
+
+.notice {
+    background: #182532;
+    border-right: 4px solid #c69b38;
+    padding: 12px;
+    margin-top: 12px;
+    border-radius: 5px;
+    color: #d9cba7;
+}
+
+.leaflet-container {
+    background: #101c29;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+.leaflet-tooltip {
+    background: #151b21;
+    color: #f4d47e;
+    border: 1px solid #b68b32;
+    border-radius: 4px;
+    font-weight: bold;
+    box-shadow: none;
 }
 
 footer {
     text-align: center;
     padding: 20px;
-    color: #aab6bd;
+    color: #99845b;
+    border-top: 1px solid #55421d;
+    margin-top: 25px;
 }
 
-.small {
-    color: #aab6bd;
-    font-size: 13px;
-}
+@media(max-width:800px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
 
-@media(max-width:400px) {
-    .map {
-        grid-template-columns: repeat(2,1fr);
+    #map {
+        height: 400px;
+    }
+
+    header h1 {
+        font-size: 23px;
     }
 }
 </style>
@@ -181,422 +229,699 @@ footer {
 <body>
 
 <header>
-    <h1>⚔️ أسياد العرب</h1>
-    <p>Arab Empires — ابنِ دولتك واصنع إمبراطوريتك</p>
+    <h1>THE LAST EMPIRE</h1>
+    <p>إمبراطوريتك تبدأ من هنا... اصنع تاريخك</p>
 </header>
 
-<main class="container">
+<nav>
+    <button onclick="showSection('mapSection')">🗺️ الخريطة</button>
+    <button onclick="showSection('resourcesSection')">💰 الموارد</button>
+    <button onclick="showSection('countrySection')">🏛️ دولتي</button>
+    <button onclick="showSection('armySection')">⚔️ الجيش</button>
+    <button onclick="showSection('missionsSection')">🎯 المهام</button>
+</nav>
 
-    <section class="resources">
-        <div class="resource">💰 الذهب<span id="gold">5000</span></div>
-        <div class="resource">🛢️ النفط<span id="oil">2000</span></div>
-        <div class="resource">🌾 الغذاء<span id="food">3000</span></div>
-        <div class="resource">⚙️ الحديد<span id="iron">1500</span></div>
-        <div class="resource">👥 السكان<span id="population">10000</span></div>
+<div class="container">
+
+    <section id="resourcesSection">
+        <h2 class="section-title">💎 موارد الإمبراطورية</h2>
+
+        <div class="resources">
+
+            <div class="resource">
+                <div class="icon">🪙</div>
+                <div class="name">الذهب</div>
+                <div class="amount" id="gold">10000</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🛢️</div>
+                <div class="name">النفط</div>
+                <div class="amount" id="oil">15000</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🌾</div>
+                <div class="name">الغذاء</div>
+                <div class="amount" id="food">12000</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">⛏️</div>
+                <div class="name">الحديد</div>
+                <div class="amount" id="iron">8000</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">💎</div>
+                <div class="name">الألماس</div>
+                <div class="amount" id="diamonds">500</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🔩</div>
+                <div class="name">الفولاذ</div>
+                <div class="amount" id="steel">4000</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">☢️</div>
+                <div class="name">اليورانيوم</div>
+                <div class="amount" id="uranium">300</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">⚡</div>
+                <div class="name">الطاقة</div>
+                <div class="amount" id="energy">9000</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🥈</div>
+                <div class="name">الفضة</div>
+                <div class="amount" id="silver">2000</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🧪</div>
+                <div class="name">المواد الكيميائية</div>
+                <div class="amount" id="chemicals">1500</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🧱</div>
+                <div class="name">مواد البناء</div>
+                <div class="amount" id="materials">6000</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">👥</div>
+                <div class="name">السكان</div>
+                <div class="amount" id="population">500000</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🧠</div>
+                <div class="name">التكنولوجيا</div>
+                <div class="amount" id="technology">100</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🔋</div>
+                <div class="name">البطاريات</div>
+                <div class="amount" id="batteries">1000</div>
+            </div>
+
+            <div class="resource">
+                <div class="icon">⚙️</div>
+                <div class="name">قطع الغيار</div>
+                <div class="amount" id="spareparts">2000</div>
+            </div>
+
+        </div>
     </section>
 
-    <div class="layout">
+    <div class="main-grid">
 
-        <div>
-            <section class="panel">
-                <h2>🏛️ إدارة الدولة</h2>
+        <section class="panel" id="mapSection">
+            <h2 class="section-title">🗺️ خريطة الوطن العربي</h2>
 
-                <label for="country">اختر دولتك:</label>
+            <p class="map-note">
+                اضغط على الدولة التي تريد حكمها. يمكنك تكبير الخريطة وتحريكها.
+            </p>
 
-                <select id="country">
-                    <option>اليمن</option>
-                    <option>السعودية</option>
-                    <option>مصر</option>
-                    <option>العراق</option>
-                    <option>سوريا</option>
-                    <option>الأردن</option>
-                    <option>عُمان</option>
-                    <option>الإمارات</option>
-                    <option>الكويت</option>
-                    <option>قطر</option>
-                    <option>البحرين</option>
-                    <option>لبنان</option>
-                    <option>فلسطين</option>
-                    <option>ليبيا</option>
-                    <option>تونس</option>
-                    <option>الجزائر</option>
-                    <option>المغرب</option>
-                    <option>السودان</option>
-                    <option>الصومال</option>
-                    <option>موريتانيا</option>
-                </select>
+            <div id="map"></div>
 
-                <button onclick="chooseCountry()">تأكيد اختيار الدولة</button>
+            <div class="country-info" id="selectedCountry">
+                <h3>👑 الإمبراطورية</h3>
+                <div>اختر دولة من الخريطة لبدء حكمك.</div>
+            </div>
+        </section>
 
-                <div class="item">
-                    دولتك الحالية:
-                    <strong id="currentCountry">اليمن</strong>
-                </div>
+        <aside class="panel" id="countrySection">
+            <h2 class="section-title">🏛️ إدارة الدولة</h2>
 
-                <div class="item">
-                    المدن:
-                    <strong id="cities">1</strong>
-                </div>
+            <div class="stat">
+                <span>الدولة</span>
+                <strong id="countryName">لم يتم الاختيار</strong>
+            </div>
 
-                <div class="item">
-                    المصانع:
-                    <strong id="factories">1</strong>
-                </div>
+            <div class="stat">
+                <span>القوة الاقتصادية</span>
+                <strong id="economy">100</strong>
+            </div>
 
-                <div class="item">
-                    المزارع:
-                    <strong id="farms">2</strong>
-                </div>
-            </section>
+            <div class="stat">
+                <span>الاستقرار</span>
+                <strong id="stability">75%</strong>
+            </div>
 
-            <section class="panel">
-                <h2>🗺️ خريطة الدول العربية</h2>
-                <p class="small">اختر دولة من الخريطة لتحديدها في اللعبة.</p>
-                <div class="map" id="map"></div>
-            </section>
+            <div class="stat">
+                <span>القوة العسكرية</span>
+                <strong id="power">100</strong>
+            </div>
 
-            <section class="panel">
-                <h2>🏗️ تطوير الدولة</h2>
-                <button onclick="buildCity()">🏙️ بناء مدينة — 1000 ذهب</button>
-                <button onclick="buildFarm()">🌾 بناء مزرعة — 500 ذهب</button>
-                <button onclick="buildFactory()">🏭 بناء مصنع — 1500 ذهب</button>
-            </section>
-        </div>
+            <h3 class="section-title">🏗️ المباني</h3>
 
-        <div>
-            <section class="panel">
-                <h2>✈️ القوات الجوية</h2>
+            <button class="side-button" onclick="build('farm')">
+                🌾 إنشاء مزرعة
+            </button>
 
-                <div class="item">
-                    الطائرات:
-                    <strong id="aircraft">0</strong>
-                </div>
+            <button class="side-button" onclick="build('factory')">
+                🏭 إنشاء مصنع
+            </button>
 
-                <button onclick="buyAircraft()">شراء طائرة — 1200 ذهب</button>
+            <button class="side-button" onclick="build('mine')">
+                ⛏️ إنشاء منجم
+            </button>
 
-                <div class="item">
-                    الطائرات المسيّرة:
-                    <strong id="drones">0</strong>
-                </div>
+            <button class="side-button" onclick="build('powerplant')">
+                ⚡ إنشاء محطة طاقة
+            </button>
 
-                <button onclick="buyDrone()">شراء طائرة مسيّرة — 500 ذهب</button>
-            </section>
+            <button class="side-button" onclick="build('base')">
+                🏰 إنشاء قاعدة عسكرية
+            </button>
 
-            <section class="panel">
-                <h2>🚀 الصواريخ</h2>
-
-                <div class="item">
-                    الصواريخ:
-                    <strong id="missiles">0</strong>
-                </div>
-
-                <button onclick="buyMissile()">شراء صاروخ — 800 ذهب</button>
-            </section>
-
-            <section class="panel">
-                <h2>🛡️ الدفاع</h2>
-
-                <div class="item">
-                    وحدات الدفاع:
-                    <strong id="defense">0</strong>
-                </div>
-
-                <button onclick="buyDefense()">شراء وحدة دفاع — 1000 ذهب</button>
-            </section>
-
-            <section class="panel">
-                <h2>💾 حفظ اللعبة</h2>
-                <button onclick="saveGame()">حفظ التقدم الآن</button>
-                <button onclick="resetGame()">بدء لعبة جديدة</button>
-                <p class="small">يُحفظ التقدم تلقائيًا على هذا المتصفح أيضًا.</p>
-            </section>
-        </div>
+            <div class="notice">
+                اختر دولتك أولاً حتى تتمكن من بناء منشآتها وتطوير اقتصادها.
+            </div>
+        </aside>
 
     </div>
 
-    <section class="panel">
-        <h2>📜 سجل الأحداث</h2>
-        <div id="log">
-            <div class="log-entry">مرحبًا بك في أسياد العرب. بدأت رحلتك!</div>
-        </div>
+    <section class="panel" id="armySection" style="margin-top:15px">
+        <h2 class="section-title">⚔️ الجيش الإمبراطوري</h2>
+        <p>سيتم تفعيل القوات والتطوير العسكري في الجزء الثاني.</p>
     </section>
 
-</main>
+    <section class="panel" id="missionsSection" style="margin-top:15px">
+        <h2 class="section-title">🎯 المهام الإمبراطورية</h2>
+        <p>سيتم إضافة المهام والمكافآت في الجزء الثاني.</p>
+    </section>
+
+</div>
 
 <footer>
-    Arab Empires © 2026 — أسياد العرب
+    THE LAST EMPIRE — المجد لمن يصنعه
 </footer>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-"use strict";
 
-/* بيانات اللعبة */
+// =====================================
+// إعداد الخريطة الجغرافية
+// =====================================
 
-const initialGame = {
-    gold: 5000,
-    oil: 2000,
-    food: 3000,
-    iron: 1500,
-    population: 10000,
-    cities: 1,
-    farms: 2,
-    factories: 1,
-    aircraft: 0,
-    drones: 0,
-    missiles: 0,
-    defense: 0,
-    country: "اليمن"
+const map = L.map('map', {
+    zoomControl: true,
+    minZoom: 3
+}).setView([24, 37], 4);
+
+let selectedLayer = null;
+let selectedCountry = null;
+
+const arabCountries = {
+    "Algeria": "الجزائر",
+    "Bahrain": "البحرين",
+    "Comoros": "جزر القمر",
+    "Djibouti": "جيبوتي",
+    "Egypt": "مصر",
+    "Iraq": "العراق",
+    "Jordan": "الأردن",
+    "Kuwait": "الكويت",
+    "Lebanon": "لبنان",
+    "Libya": "ليبيا",
+    "Mauritania": "موريتانيا",
+    "Morocco": "المغرب",
+    "Oman": "عُمان",
+    "Palestine": "فلسطين",
+    "Qatar": "قطر",
+    "Saudi Arabia": "السعودية",
+    "Somalia": "الصومال",
+    "Sudan": "السودان",
+    "Syria": "سوريا",
+    "Tunisia": "تونس",
+    "United Arab Emirates": "الإمارات",
+    "Yemen": "اليمن"
 };
 
-let game = {...initialGame};
+// الجزء الثاني سيكمل:
+// تحميل حدود الدول الجغرافية
+// تلوين الدول
+// اختيار الدولة بالضغط عليها
+// بناء المنشآت
+// نظام الجيش والموارد والحفظ 
+// =====================================
+// تحميل الخريطة الحقيقية وحدود الدول
+// =====================================
 
-const countries = [
-    "اليمن","السعودية","مصر",
-    "العراق","سوريا","الأردن",
-    "عُمان","الإمارات","الكويت",
-    "قطر","البحرين","لبنان",
-    "فلسطين","ليبيا","تونس",
-    "الجزائر","المغرب","السودان",
-    "الصومال","موريتانيا"
-];
+const arabNames = new Set(Object.keys(arabCountries));
 
-/* سجل الأحداث */
+const geoUrl =
+"https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson";
 
-function logEvent(message) {
-    const log = document.getElementById("log");
-    const entry = document.createElement("div");
+fetch(geoUrl)
+.then(response => {
+    if (!response.ok) throw new Error("Map loading failed");
+    return response.json();
+})
+.then(data => {
 
-    entry.className = "log-entry";
-    entry.textContent = message;
-
-    log.prepend(entry);
-
-    while (log.children.length > 25) {
-        log.removeChild(log.lastChild);
-    }
-}
-
-/* تحديث الشاشة */
-
-function update() {
-    const fields = [
-        "gold","oil","food","iron","population",
-        "cities","farms","factories",
-        "aircraft","drones","missiles","defense"
-    ];
-
-    fields.forEach(field => {
-        document.getElementById(field).textContent =
-            Number(game[field]).toLocaleString("en-US");
+    const arabFeatures = data.features.filter(feature => {
+        const p = feature.properties;
+        const name = p.ADMIN || p.name || p.name_en;
+        return arabNames.has(name);
     });
 
-    document.getElementById("currentCountry").textContent = game.country;
-    document.getElementById("country").value = game.country;
+    const geoLayer = L.geoJSON(arabFeatures, {
+        style: {
+            color: "#d6ad50",
+            weight: 1.5,
+            fillColor: "#765a26",
+            fillOpacity: 0.55
+        },
 
-    document.querySelectorAll(".country").forEach(button => {
-        button.classList.toggle(
-            "selected",
-            button.dataset.name === game.country
-        );
-    });
-}
+        onEachFeature: (feature, layer) => {
+            const p = feature.properties;
+            const englishName = p.ADMIN || p.name || p.name_en;
+            const arabicName = arabCountries[englishName];
 
-/* الحفظ */
+            if (!arabicName) return;
 
-function saveGame() {
-    try {
-        localStorage.setItem("arabEmpiresSave", JSON.stringify(game));
-        logEvent("تم حفظ تقدمك بنجاح.");
-    } catch (error) {
-        logEvent("تعذر الحفظ في هذا المتصفح.");
-    }
-}
+            layer.bindTooltip(arabicName);
 
-/* تحميل الحفظ */
+            layer.on("mouseover", function() {
+                this.setStyle({
+                    fillColor: "#e0b94d",
+                    fillOpacity: 0.8,
+                    weight: 2
+                });
+            });
 
-function loadGame() {
-    try {
-        const saved = localStorage.getItem("arabEmpiresSave");
-
-        if (saved) {
-            const data = JSON.parse(saved);
-
-            Object.keys(initialGame).forEach(key => {
-                if (data[key] !== undefined) {
-                    game[key] = data[key];
+            layer.on("mouseout", function() {
+                geoLayer.resetStyle(this);
+                if (this === selectedLayer) {
+                    this.setStyle({
+                        fillColor: "#d4a52f",
+                        fillOpacity: 0.9
+                    });
                 }
             });
+
+            layer.on("click", function() {
+                chooseCountry(arabicName, this);
+            });
         }
-    } catch (error) {
-        game = {...initialGame};
-    }
+    }).addTo(map);
 
-    update();
-}
-
-/* اختيار الدولة */
-
-function chooseCountry() {
-    game.country = document.getElementById("country").value;
-
-    update();
-    saveSilently();
-
-    logEvent("أصبحت تقود دولة " + game.country);
-}
-
-/* حفظ بدون رسالة متكررة */
-
-function saveSilently() {
-    try {
-        localStorage.setItem("arabEmpiresSave", JSON.stringify(game));
-    } catch (error) {}
-}
-
-/* البناء */
-
-function buildCity() {
-    if (game.gold < 1000) {
-        return logEvent("لا يوجد ذهب كافٍ.");
-    }
-
-    game.gold -= 1000;
-    game.cities++;
-    game.population += 2000;
-
-    update();
-    saveSilently();
-    logEvent("تم بناء مدينة جديدة!");
-}
-
-function buildFarm() {
-    if (game.gold < 500) {
-        return logEvent("لا يوجد ذهب كافٍ.");
-    }
-
-    game.gold -= 500;
-    game.farms++;
-
-    update();
-    saveSilently();
-    logEvent("تم بناء مزرعة جديدة!");
-}
-
-function buildFactory() {
-    if (game.gold < 1500) {
-        return logEvent("لا يوجد ذهب كافٍ.");
-    }
-
-    game.gold -= 1500;
-    game.factories++;
-
-    update();
-    saveSilently();
-    logEvent("تم بناء مصنع جديد!");
-}
-
-/* الطائرات */
-
-function buyAircraft() {
-    if (game.gold < 1200 || game.oil < 100) {
-        return logEvent("تحتاج إلى 1200 ذهب و100 نفط.");
-    }
-
-    game.gold -= 1200;
-    game.oil -= 100;
-    game.aircraft++;
-
-    update();
-    saveSilently();
-    logEvent("تم شراء طائرة.");
-}
-
-function buyDrone() {
-    if (game.gold < 500 || game.oil < 30) {
-        return logEvent("تحتاج إلى 500 ذهب و30 نفط.");
-    }
-
-    game.gold -= 500;
-    game.oil -= 30;
-    game.drones++;
-
-    update();
-    saveSilently();
-    logEvent("تم شراء طائرة مسيّرة.");
-}
-
-/* الصواريخ والدفاع */
-
-function buyMissile() {
-    if (game.gold < 800 || game.iron < 100) {
-        return logEvent("تحتاج إلى 800 ذهب و100 حديد.");
-    }
-
-    game.gold -= 800;
-    game.iron -= 100;
-    game.missiles++;
-
-    update();
-    saveSilently();
-    logEvent("تم شراء صاروخ.");
-}
-
-function buyDefense() {
-    if (game.gold < 1000 || game.iron < 150) {
-        return logEvent("تحتاج إلى 1000 ذهب و150 حديد.");
-    }
-
-    game.gold -= 1000;
-    game.iron -= 150;
-    game.defense++;
-
-    update();
-    saveSilently();
-    logEvent("تم شراء وحدة دفاع.");
-}
-
-/* إنتاج الموارد كل خمس ثوانٍ */
-
-setInterval(() => {
-    game.gold += game.cities * 10;
-    game.food += game.farms * 15;
-    game.iron += game.factories * 5;
-    game.oil += 2;
-
-    update();
-    saveSilently();
-}, 5000);
-
-/* إنشاء الخريطة المبسطة */
-
-function createMap() {
-    const map = document.getElementById("map");
-
-    countries.forEach(name => {
-        const button = document.createElement("button");
-
-        button.className = "country";
-        button.textContent = name;
-        button.dataset.name = name;
-
-        button.addEventListener("click", () => {
-            game.country = name;
-            update();
-            saveSilently();
-            logEvent("اخترت دولة " + name);
+    if (geoLayer.getLayers().length) {
+        map.fitBounds(geoLayer.getBounds(), {
+            padding: [15, 15]
         });
+    }
 
-        map.appendChild(button);
+})
+.catch(error => {
+    document.getElementById("selectedCountry").innerHTML =
+    "<h3>تعذر تحميل الخريطة</h3>" +
+    "<p>تأكد من اتصال الإنترنت ثم أعد تحميل اللعبة.</p>";
+});
+
+
+// =====================================
+// بيانات اللعبة
+// =====================================
+
+let game = {
+    resources: {
+        gold: 10000,
+        oil: 15000,
+        food: 12000,
+        iron: 8000,
+        diamonds: 500,
+        steel: 4000,
+        uranium: 300,
+        energy: 9000,
+        silver: 2000,
+        chemicals: 1500,
+        materials: 6000,
+        population: 500000,
+        technology: 100,
+        batteries: 1000,
+        spareparts: 2000
+    },
+
+    country: "",
+    economy: 100,
+    stability: 75,
+    power: 100,
+
+    buildings: {
+        farm: 0,
+        factory: 0,
+        mine: 0,
+        powerplant: 0,
+        base: 0
+    },
+
+    army: {
+        tanks: 0,
+        aircraft: 0,
+        ships: 0,
+        drones: 0,
+        missiles: 0,
+        defense: 0
+    }
+};
+
+
+// =====================================
+// اختيار الدولة
+// =====================================
+
+function chooseCountry(name, layer) {
+
+    selectedCountry = name;
+
+    if (selectedLayer) {
+        selectedLayer.setStyle({
+            fillColor: "#765a26",
+            fillOpacity: 0.55,
+            weight: 1.5
+        });
+    }
+
+    selectedLayer = layer;
+
+    layer.setStyle({
+        fillColor: "#d4a52f",
+        fillOpacity: 0.9,
+        weight: 3
     });
+
+    game.country = name;
+
+    document.getElementById("countryName").textContent = name;
+
+    document.getElementById("selectedCountry").innerHTML = `
+        <h3>👑 ${name}</h3>
+        <div>تم اختيار الدولة بنجاح!</div>
+        <div class="stat"><span>الاقتصاد</span><strong>${game.economy}</strong></div>
+        <div class="stat"><span>الاستقرار</span><strong>${game.stability}%</strong></div>
+        <div class="stat"><span>القوة</span><strong>${game.power}</strong></div>
+    `;
+
+    saveGame();
 }
 
-/* بدء اللعبة */
 
-createMap();
+// =====================================
+// تحديث الموارد
+// =====================================
+
+function updateResources() {
+
+    for (const key in game.resources) {
+        const element = document.getElementById(key);
+
+        if (element) {
+            element.textContent =
+                Math.floor(game.resources[key]).toLocaleString("en-US");
+        }
+    }
+
+    document.getElementById("economy").textContent = game.economy;
+    document.getElementById("stability").textContent =
+        game.stability + "%";
+    document.getElementById("power").textContent = game.power;
+}
+
+
+// =====================================
+// بناء المنشآت
+// =====================================
+
+function build(type) {
+
+    if (!game.country) {
+        alert("اختر دولة من الخريطة أولاً!");
+        return;
+    }
+
+    const costs = {
+        farm: {gold: 500, materials: 200, food: 100},
+        factory: {gold: 1200, steel: 300, materials: 500},
+        mine: {gold: 800, iron: 200, materials: 300},
+        powerplant: {gold: 1500, steel: 500, energy: 200},
+        base: {gold: 2000, steel: 700, materials: 600}
+    };
+
+    const names = {
+        farm: "مزرعة",
+        factory: "مصنع",
+        mine: "منجم",
+        powerplant: "محطة طاقة",
+        base: "قاعدة عسكرية"
+    };
+
+    const cost = costs[type];
+
+    for (const resource in cost) {
+        if (game.resources[resource] < cost[resource]) {
+            alert("الموارد غير كافية لبناء " + names[type]);
+            return;
+        }
+    }
+
+    for (const resource in cost) {
+        game.resources[resource] -= cost[resource];
+    }
+
+    game.buildings[type]++;
+
+    game.economy += 5;
+
+    if (type === "base") {
+        game.power += 10;
+    }
+
+    updateResources();
+    saveGame();
+
+    alert("تم بناء " + names[type] + " بنجاح!");
+}
+
+
+// =====================================
+// الجيش الإمبراطوري
+// =====================================
+
+function recruit(unit) {
+
+    if (!game.country) {
+        alert("اختر دولتك أولاً!");
+        return;
+    }
+
+    const units = {
+        tanks: {
+            name: "دبابة",
+            cost: {gold: 500, steel: 100, oil: 100}
+        },
+        aircraft: {
+            name: "طائرة",
+            cost: {gold: 1000, steel: 200, oil: 250}
+        },
+        ships: {
+            name: "سفينة",
+            cost: {gold: 1500, steel: 400, oil: 300}
+        },
+        drones: {
+            name: "مسيّرة",
+            cost: {gold: 600, batteries: 100, technology: 5}
+        },
+        missiles: {
+            name: "صاروخ",
+            cost: {gold: 800, steel: 150, chemicals: 50}
+        },
+        defense: {
+            name: "منظومة دفاع",
+            cost: {gold: 1200, steel: 250, technology: 10}
+        }
+    };
+
+    const selected = units[unit];
+
+    for (const resource in selected.cost) {
+        if (game.resources[resource] < selected.cost[resource]) {
+            alert("الموارد غير كافية!");
+            return;
+        }
+    }
+
+    for (const resource in selected.cost) {
+        game.resources[resource] -= selected.cost[resource];
+    }
+
+    game.army[unit]++;
+
+    game.power += 2;
+
+    updateArmy();
+    updateResources();
+    saveGame();
+
+    alert("تمت إضافة " + selected.name + " إلى الجيش!");
+}
+
+
+function updateArmy() {
+
+    const army = game.army;
+
+    document.getElementById("armySection").innerHTML = `
+        <h2 class="section-title">⚔️ الجيش الإمبراطوري</h2>
+
+        <div class="resources">
+
+            <div class="resource">
+                <div class="icon">🚜</div>
+                <div class="name">الدبابات</div>
+                <div class="amount">${army.tanks}</div>
+                <button class="action-button" onclick="recruit('tanks')">تجنيد</button>
+            </div>
+
+            <div class="resource">
+                <div class="icon">✈️</div>
+                <div class="name">الطائرات</div>
+                <div class="amount">${army.aircraft}</div>
+                <button class="action-button" onclick="recruit('aircraft')">تجنيد</button>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🚢</div>
+                <div class="name">السفن</div>
+                <div class="amount">${army.ships}</div>
+                <button class="action-button" onclick="recruit('ships')">تجنيد</button>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🛸</div>
+                <div class="name">المسيّرات</div>
+                <div class="amount">${army.drones}</div>
+                <button class="action-button" onclick="recruit('drones')">تجنيد</button>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🚀</div>
+                <div class="name">الصواريخ</div>
+                <div class="amount">${army.missiles}</div>
+                <button class="action-button" onclick="recruit('missiles')">تجنيد</button>
+            </div>
+
+            <div class="resource">
+                <div class="icon">🛡️</div>
+                <div class="name">الدفاع الجوي</div>
+                <div class="amount">${army.defense}</div>
+                <button class="action-button" onclick="recruit('defense')">تجنيد</button>
+            </div>
+
+        </div>
+    `;
+}
+
+
+// =====================================
+// الإنتاج التلقائي
+// =====================================
+
+function production() {
+
+    game.resources.gold += 20 + game.buildings.factory * 15;
+    game.resources.food += 30 + game.buildings.farm * 25;
+    game.resources.iron += 10 + game.buildings.mine * 20;
+    game.resources.energy += 20 + game.buildings.powerplant * 30;
+    game.resources.oil += 10;
+    game.resources.materials += game.buildings.factory * 5;
+
+    updateResources();
+    saveGame();
+}
+
+
+// =====================================
+// الحفظ والتحميل
+// =====================================
+
+function saveGame() {
+    localStorage.setItem("lastEmpireSave", JSON.stringify(game));
+}
+
+function loadGame() {
+
+    const saved = localStorage.getItem("lastEmpireSave");
+
+    if (!saved) return;
+
+    try {
+        const loaded = JSON.parse(saved);
+
+        if (loaded.resources && loaded.buildings && loaded.army) {
+            game = loaded;
+        }
+
+    } catch (error) {
+        console.log("Save data could not be loaded");
+    }
+}
+
+
+// =====================================
+// التنقل بين الأقسام
+// =====================================
+
+function showSection(id) {
+
+    const section = document.getElementById(id);
+
+    if (section) {
+        section.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+}
+
+
+// =====================================
+// إعادة تشغيل اللعبة
+// =====================================
+
+function resetGame() {
+
+    if (!confirm("هل تريد بدء إمبراطورية جديدة؟")) {
+        return;
+    }
+
+    localStorage.removeItem("lastEmpireSave");
+    location.reload();
+}
+
+
+// =====================================
+// تشغيل اللعبة
+// =====================================
+
 loadGame();
+updateResources();
+updateArmy();
 
-logEvent("أهلًا بك! إمبراطوريتك جاهزة.");
+setInterval(production, 5000);
+
+saveGame();
+
 </script>
-
 </body>
 </html>
