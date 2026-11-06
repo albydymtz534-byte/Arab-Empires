@@ -34,20 +34,35 @@ header{
 #countryPanel{
  position:absolute;bottom:15px;right:15px;z-index:1000;
  background:#151d25;border:2px solid #c49a3b;
- border-radius:10px;padding:15px;width:240px;
+ border-radius:10px;padding:15px;width:260px;
  display:none;box-shadow:0 4px 20px #000
 }
-#countryPanel h3{color:#f3d276;margin:0 0 10px}
+#countryPanel h3{color:#f3d276;margin:0 0 5px}
+.building-stats{
+ font-size: 11px; margin: 6px 0; color: #d4af37;
+ background: #1b242d; padding: 5px; border-radius: 5px;
+ border: 1px solid #5a451d; text-align: center;
+}
 button{
  background:#74551b;color:white;border:1px solid #e0b84f;
- border-radius:6px;padding:9px;margin-top:7px;
- width:100%;cursor:pointer
+ border-radius:6px;padding:7px;margin-top:5px;
+ width:100%;cursor:pointer;font-size:12px
 }
 button:hover{background:#a77b24}
 #message{
  position:absolute;bottom:15px;left:15px;z-index:1000;
  background:#151d25;border:1px solid #c49a3b;
  padding:10px;border-radius:7px;font-size:12px
+}
+.arab-country-label {
+    background: #17120c;
+    border: 1px solid #e8bd55;
+    color: #ffe29a;
+    font-weight: bold;
+    font-size: 11px;
+    padding: 3px 5px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px #000;
 }
 @media(max-width:500px){
  header{height:75px;flex-direction:column}
@@ -67,6 +82,7 @@ button:hover{background:#a77b24}
   <div class="resource">🛢️ النفط: <b id="oil">5000</b></div>
   <div class="resource">🪵 الخشب: <b id="wood">5000</b></div>
   <div class="resource">⛓️ الحديد: <b id="iron">5000</b></div>
+  <div class="resource">⚔️ الجنود: <b id="soldiers">0</b></div>
  </div>
 </header>
 
@@ -74,82 +90,106 @@ button:hover{background:#a77b24}
 
 <div id="countryPanel">
  <h3 id="countryName">الدولة</h3>
- <div>👑 دولة الإمبراطورية</div>
- <button onclick="build('farm')">🌾 بناء مزرعة</button>
- <button onclick="build('factory')">🏭 بناء مصنع</button>
- <button onclick="build('base')">🏰 بناء قاعدة</button>
- <button onclick="closePanel()">إغلاق</button>
+ <div style="font-size: 12px; color: #aaa;">👑 دولة الإمبراطورية</div>
+ <div class="building-stats">
+  🌾 المزارع: <span id="farmCount">0</span> | 
+  🏭 المصانع: <span id="factoryCount">0</span> | 
+  🏰 القواعد: <span id="baseCount">0</span>
+ </div>
+ <button onclick="build('farm')">🌾 بناء مزرعة (500 💰)</button>
+ <button onclick="build('factory')">🏭 بناء مصنع (1200 💰)</button>
+ <button onclick="build('base')">🏰 بناء قاعدة (2000 💰)</button>
+ <button onclick="buttonRecruit()" style="background:#2d5a3d; border-color:#52a871;">⚔️ تجنيد جيش (200 💰 + 100 ⛓️)</button>
+ <button onclick="closePanel()" style="background:#5a2d2d; border-color:#a85252;">إغلاق</button>
 </div>
 
 <div id="message">🗺️ اضغط على دولة لاختيارها</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const map=L.map("map",{zoomControl:true})
- .setView([25,35],4);
+const map = L.map("map", { zoomControl: true }).setView([25, 35], 4);
 
-let selectedLayer=null;
-let selectedCountry="";
-let money=10000,oil=5000,wood=5000,iron=5000;
+let selectedLayer = null;
+let selectedCountry = "";
 
-const countries={
- DZA:"الجزائر",BHR:"البحرين",COM:"جزر القمر",
- DJI:"جيبوتي",EGY:"مصر",IRQ:"العراق",JOR:"الأردن",
- KWT:"الكويت",LBN:"لبنان",LBY:"ليبيا",
- MRT:"موريتانيا",MAR:"المغرب",OMN:"عُمان",
- PSE:"فلسطين",QAT:"قطر",SAU:"السعودية",
- SOM:"الصومال",SDN:"السودان",SYR:"سوريا",
- TUN:"تونس",ARE:"الإمارات",YEM:"اليمن"
+let resources = {
+    money: 10000,
+    oil: 5000,
+    wood: 5000,
+    iron: 5000,
+    soldiers: 0
 };
 
-function chooseCountry(name,layer){
- if(selectedLayer){
-  geoLayer.resetStyle(selectedLayer);
- }
- selectedLayer=layer;
- selectedCountry=name;
- layer.setStyle({fillColor:"#e4b83e",fillOpacity:0.95,weight:3});
- document.getElementById("countryName").textContent="👑 "+name;
- document.getElementById("countryPanel").style.display="block";
- document.getElementById("message").textContent="الدولة المختارة: "+name;
- saveGame();
+let buildings = {
+    farm: 0,
+    factory: 0,
+    base: 0
+};
+
+const countries = {
+    DZA: "الجزائر", BHR: "البحرين", COM: "جزر القمر",
+    DJI: "جيبوتي", EGY: "مصر", IRQ: "العراق", JOR: "الأردن",
+    KWT: "الكويت", LBN: "لبنان", LBY: "ليبيا",
+    MRT: "موريتانيا", MAR: "المغرب", OMN: "عُمان",
+    PSE: "فلسطين", QAT: "قطر", SAU: "السعودية",
+    SOM: "الصومال", SDN: "السودان", SYR: "سوريا",
+    TUN: "تونس", ARE: "الإمارات", YEM: "اليمن"
+};
+
+function chooseCountry(name, layer) {
+    if (selectedLayer) {
+        geoLayer.resetStyle(selectedLayer);
+    }
+    selectedLayer = layer;
+    selectedCountry = name;
+    layer.setStyle({ fillColor: "#e4b83e", fillOpacity: 0.95, weight: 3 });
+    document.getElementById("countryName").textContent = "👑 " + name;
+    document.getElementById("countryPanel").style.display = "block";
+    document.getElementById("message").textContent = "الدولة المختارة: " + name;
+    updateBuildingCounts();
+    saveGame();
 }
 
-function closePanel(){
- document.getElementById("countryPanel").style.display="none";
+function closePanel() {
+    document.getElementById("countryPanel").style.display = "none";
 }
 
-function updateResources(){
- document.getElementById("money").textContent=money.toLocaleString();
- document.getElementById("oil").textContent=oil.toLocaleString();
- document.getElementById("wood").textContent=wood.toLocaleString();
- document.getElementById("iron").textContent=iron.toLocaleString();
+function updateBuildingCounts() {
+    document.getElementById("farmCount").textContent = buildings.farm;
+    document.getElementById("factoryCount").textContent = buildings.factory;
+    document.getElementById("baseCount").textContent = buildings.base;
 }
 
-function saveGame(){
- localStorage.setItem("lastEmpire",JSON.stringify({
- money,oil,wood,iron,selectedCountry
- }));
+function updateResources() {
+    document.getElementById("money").textContent = resources.money.toLocaleString();
+    document.getElementById("oil").textContent = resources.oil.toLocaleString();
+    document.getElementById("wood").textContent = resources.wood.toLocaleString();
+    document.getElementById("iron").textContent = resources.iron.toLocaleString();
+    document.getElementById("soldiers").textContent = resources.soldiers.toLocaleString();
+    updateBuildingCounts();
 }
 
-function loadGame(){
- try{
-  const saved=JSON.parse(localStorage.getItem("lastEmpire"));
-  if(saved){
-   money=saved.money;
-   oil=saved.oil;
-   wood=saved.wood;
-   iron=saved.iron;
-   selectedCountry=saved.selectedCountry||"";
-  }
- }catch(e){}
- updateResources();
+function saveGame() {
+    localStorage.setItem("lastEmpire", JSON.stringify({
+        resources,
+        selectedCountry,
+        buildings
+    }));
+}
+
+function loadGame() {
+    try {
+        const saved = JSON.parse(localStorage.getItem("lastEmpire"));
+        if (saved) {
+            if (saved.resources) resources = saved.resources;
+            selectedCountry = saved.selectedCountry || "";
+            if (saved.buildings) buildings = saved.buildings;
+        }
+    } catch (e) {}
+    updateResources();
 }
 
 loadGame();
-// =====================================
-// تحميل خريطة الوطن العربي
-// =====================================
 
 let geoLayer = null;
 
@@ -158,8 +198,7 @@ const countryColors = [
     "#694b72", "#80632b", "#526b39"
 ];
 
-const geoUrl =
-"https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson";
+const geoUrl = "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson";
 
 fetch(geoUrl)
 .then(response => {
@@ -167,31 +206,17 @@ fetch(geoUrl)
     return response.json();
 })
 .then(data => {
-
     const features = data.features.filter(feature => {
         const p = feature.properties;
-
-        const code =
-            p.ISO_A3 ||
-            p.ADM0_A3 ||
-            p.SOV_A3 ||
-            p["ISO3166-1-Alpha-3"];
-
+        const code = p.ISO_A3 || p.ADM0_A3 || p.SOV_A3 || p["ISO3166-1-Alpha-3"];
         return countries[code] !== undefined;
     });
 
     geoLayer = L.geoJSON(features, {
-
         style: feature => {
             const p = feature.properties;
-            const code =
-                p.ISO_A3 ||
-                p.ADM0_A3 ||
-                p.SOV_A3 ||
-                p["ISO3166-1-Alpha-3"];
-
+            const code = p.ISO_A3 || p.ADM0_A3 || p.SOV_A3 || p["ISO3166-1-Alpha-3"];
             const index = Object.keys(countries).indexOf(code);
-
             return {
                 color: "#e9c66b",
                 weight: 1.5,
@@ -199,16 +224,9 @@ fetch(geoUrl)
                 fillOpacity: 0.8
             };
         },
-
         onEachFeature: (feature, layer) => {
-
             const p = feature.properties;
-            const code =
-                p.ISO_A3 ||
-                p.ADM0_A3 ||
-                p.SOV_A3 ||
-                p["ISO3166-1-Alpha-3"];
-
+            const code = p.ISO_A3 || p.ADM0_A3 || p.SOV_A3 || p["ISO3166-1-Alpha-3"];
             const name = countries[code];
 
             if (!name) return;
@@ -239,73 +257,37 @@ fetch(geoUrl)
                 chooseCountry(name, this);
             });
         }
-
     }).addTo(map);
 
     map.fitBounds(geoLayer.getBounds(), {
         padding: [20, 20]
     });
 
-    // استعادة لون الدولة المحفوظة
     if (selectedCountry) {
         geoLayer.eachLayer(layer => {
             const p = layer.feature.properties;
-            const code =
-                p.ISO_A3 ||
-                p.ADM0_A3 ||
-                p.SOV_A3 ||
-                p["ISO3166-1-Alpha-3"];
-
+            const code = p.ISO_A3 || p.ADM0_A3 || p.SOV_A3 || p["ISO3166-1-Alpha-3"];
             if (countries[code] === selectedCountry) {
                 chooseCountry(selectedCountry, layer);
             }
         });
     }
-
 })
 .catch(error => {
     console.error(error);
-    document.getElementById("message").textContent =
-        "تعذر تحميل الخريطة. تحقق من الإنترنت وأعد المحاولة.";
+    document.getElementById("message").textContent = "تعذر تحميل الخريطة. تحقق من الإنترنت وأعد المحاولة.";
 });
 
-
-// =====================================
-// نظام البناء
-// =====================================
-
-let buildings = {
-    farm: 0,
-    factory: 0,
-    base: 0
-};
-
 function build(type) {
-
     if (!selectedCountry) {
         alert("اختر دولة أولاً!");
         return;
     }
 
     const costs = {
-        farm: {
-            money: 500,
-            wood: 100,
-            iron: 50
-        },
-
-        factory: {
-            money: 1200,
-            wood: 200,
-            iron: 300
-        },
-
-        base: {
-            money: 2000,
-            wood: 300,
-            iron: 500,
-            oil: 100
-        }
+        farm: { money: 500, wood: 100, iron: 50 },
+        factory: { money: 1200, wood: 200, iron: 300 },
+        base: { money: 2000, wood: 300, iron: 500, oil: 100 }
     };
 
     const names = {
@@ -316,15 +298,15 @@ function build(type) {
 
     const cost = costs[type];
 
-    for (const resource in cost) {
-        if (window[resource] < cost[resource]) {
+    for (const res in cost) {
+        if (resources[res] < cost[res]) {
             alert("مواردك لا تكفي لبناء " + names[type]);
             return;
         }
     }
 
-    for (const resource in cost) {
-        window[resource] -= cost[resource];
+    for (const res in cost) {
+        resources[res] -= cost[res];
     }
 
     buildings[type]++;
@@ -335,73 +317,39 @@ function build(type) {
     alert("تم بناء " + names[type] + " في " + selectedCountry);
 }
 
+function buttonRecruit() {
+    if (!selectedCountry) {
+        alert("اختر دولة أولاً!");
+        return;
+    }
+    
+    if (buildings.base === 0) {
+        alert("تحتاج إلى بناء قاعدة عسكرية أولاً لتتمكن من تجنيد الجنود!");
+        return;
+    }
 
-// =====================================
-// الإنتاج التلقائي
-// =====================================
+    if (resources.money >= 200 && resources.iron >= 100) {
+        resources.money -= 200;
+        resources.iron -= 100;
+        resources.soldiers += 50;
+        updateResources();
+        saveGame();
+        alert("تم تجنيد 50 جندياً بنجاح!");
+    } else {
+        alert("الموارد غير كافية للتجنيد (تحتاج 200 مال و 100 حديد)");
+    }
+}
 
 setInterval(() => {
-
-    money += 20 + buildings.factory * 15;
-    oil += 10;
-    wood += 10 + buildings.farm * 5;
-    iron += 5 + buildings.factory * 5;
+    resources.money += 20 + buildings.factory * 15;
+    resources.oil += 10;
+    resources.wood += 10 + buildings.farm * 5;
+    resources.iron += 5 + buildings.factory * 5;
 
     updateResources();
     saveGame();
-
 }, 10000);
-
-
-// =====================================
-// الحفظ المطور
-// =====================================
-
-const oldSave = saveGame;
-
-saveGame = function() {
-
-    localStorage.setItem("lastEmpire", JSON.stringify({
-        money,
-        oil,
-        wood,
-        iron,
-        selectedCountry,
-        buildings
-    }));
-
-};
-
-function loadBuildings() {
-
-    try {
-        const saved = JSON.parse(
-            localStorage.getItem("lastEmpire")
-        );
-
-        if (saved && saved.buildings) {
-            buildings = saved.buildings;
-        }
-
-    } catch (e) {}
-}
-
-loadBuildings();
-saveGame();
 </script>
-
-<style>
-.arab-country-label {
-    background: #17120c;
-    border: 1px solid #e8bd55;
-    color: #ffe29a;
-    font-weight: bold;
-    font-size: 11px;
-    padding: 3px 5px;
-    border-radius: 5px;
-    box-shadow: 0 1px 5px #000;
-}
-</style>
 
 </body>
 </html>
