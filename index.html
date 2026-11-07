@@ -297,4 +297,103 @@
         updateUI();
     </script>
 </body>
+<div id="login-box" style="position:fixed;inset:0;background:#0a0a0c;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#1a1a22;padding:25px;border:1px solid #f39c12;border-radius:15px;width:90%;max-width:350px;text-align:center;">
+    <h2 style="color:#f39c12;margin-bottom:20px;">👑 العهد الأخير</h2>
+    <input id="player-name" placeholder="اسم اللاعب" style="width:100%;padding:12px;margin:7px 0;">
+    <input id="player-email" type="email" placeholder="البريد الإلكتروني" style="width:100%;padding:12px;margin:7px 0;direction:ltr;">
+    <input id="player-password" type="password" placeholder="كلمة المرور" style="width:100%;padding:12px;margin:7px 0;">
+    <button onclick="registerPlayer()" class="action-btn">إنشاء حساب</button>
+    <button onclick="loginPlayer()" class="action-btn">تسجيل الدخول</button>
+    <p id="login-message" style="margin-top:12px;color:#f39c12;"></p>
+  </div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCa5CpBhOs23W2_ElHFf3Z1OhOm6OFA6Vs",
+  authDomain: "arab-empires-d2bef.firebaseapp.com",
+  databaseURL: "https://arab-empires-d2bef-default-rtdb.firebaseio.com",
+  projectId: "arab-empires-d2bef",
+  storageBucket: "arab-empires-d2bef.firebasestorage.app",
+  messagingSenderId: "858076630183",
+  appId: "1:858076630183:web:d7c01eb49a06216a2e5f82",
+  measurementId: "G-X45J3E995D"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.registerPlayer = async function () {
+  const name = document.getElementById("player-name").value.trim();
+  const email = document.getElementById("player-email").value.trim();
+  const password = document.getElementById("player-password").value;
+
+  if (!name || !email || password.length < 6) {
+    document.getElementById("login-message").innerText =
+      "أدخل الاسم والبريد وكلمة مرور من 6 أحرف على الأقل.";
+    return;
+  }
+
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(result.user, { displayName: name });
+
+    await setDoc(doc(db, "players", result.user.uid), {
+      username: name,
+      gold: 8500,
+      oil: 3400,
+      iron: 2100,
+      wood: 4000,
+      level: 1,
+      experience: 0,
+      createdAt: serverTimestamp()
+    });
+
+  } catch (error) {
+    document.getElementById("login-message").innerText =
+      "تعذر إنشاء الحساب: " + error.message;
+  }
+};
+
+window.loginPlayer = async function () {
+  const email = document.getElementById("player-email").value.trim();
+  const password = document.getElementById("player-password").value;
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    document.getElementById("login-message").innerText =
+      "تعذر تسجيل الدخول: " + error.message;
+  }
+};
+
+onAuthStateChanged(auth, user => {
+  const box = document.getElementById("login-box");
+
+  if (user) {
+    box.style.display = "none";
+    console.log("مرحباً بالقائد:", user.displayName);
+  } else {
+    box.style.display = "flex";
+  }
+});
+</script>
 </html>
