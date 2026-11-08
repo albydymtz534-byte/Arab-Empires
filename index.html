@@ -267,6 +267,7 @@
                 stats.palaceLvl++;
                 stats.power += 500;
                 updateUI();
+                saveGameData();
                 alert("✨ تم ترقية القصر الملكي بنجاح! ارتفعت هيبة الإمبراطورية.");
             } else {
                 alert("⚠️ المنجم يفتقر للمال الكافي (تحتاج 1000 مال)!");
@@ -280,6 +281,7 @@
                 stats.airforce += 120;
                 stats.power += 350;
                 updateUI();
+                saveGameData();
                 alert("✈️ تم تدشين مطار حربي جديد وانضمام سرب طائرات حديث!");
             } else {
                 alert("⚠️ مخزون النفط غير كافٍ لتشغيل المطار (تحتاج 600 نفط)!");
@@ -341,6 +343,34 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+let currentPlayer = null;
+
+window.saveGameData = async function () {
+    if (!currentPlayer) return;
+
+    try {
+        await setDoc(
+            doc(db, "players", currentPlayer.uid),
+            {
+                gold: resources.gold,
+                oil: resources.oil,
+                iron: resources.iron,
+                wood: resources.wood,
+                power: stats.power,
+                airforce: stats.airforce,
+                palaceLvl: stats.palaceLvl,
+                airports: stats.airports,
+                updatedAt: serverTimestamp()
+            },
+            { merge: true }
+        );
+
+        console.log("تم حفظ اللعبة بنجاح");
+    } catch (error) {
+        console.error("خطأ في الحفظ:", error);
+        alert("تعذر حفظ اللعبة: " + error.message);
+    }
+};
 
 window.registerPlayer = async function () {
   const name = document.getElementById("player-name").value.trim();
@@ -388,7 +418,7 @@ window.loginPlayer = async function () {
 
 onAuthStateChanged(auth, user => {
   const box = document.getElementById("login-box");
-
+currentPlayer = user;
   if (user) {
     box.style.display = "none";
     console.log("مرحباً بالقائد:", user.displayName);
