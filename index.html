@@ -2,8 +2,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>THE LAST EMPIRE - الإمبراطورية الأخيرة</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>
+<title>THE LAST EMPIRE - الإمبراطورية الأخيرة</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>
 :root {
     --bg-main:#0a0a0c;
     --bg-panel:#141419;
@@ -14,40 +13,44 @@
     --text-main:#ecf0f1;
     --text-muted:#95a5a6;
 }
+
 * {
     box-sizing:border-box;
     margin:0;
     padding:0;
     font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
 }
+
 body {
     background:var(--bg-main);
     color:var(--text-main);
-    height:100vh;
+    min-height:100vh;
     display:flex;
     flex-direction:column;
-    overflow:hidden;
 }
+
 #top-bar {
     background:linear-gradient(to bottom,#1a1a24,#101017);
     border-bottom:2px solid var(--accent-gold);
-    padding:12px 25px;
+    padding:12px 20px;
     display:flex;
     justify-content:space-between;
     align-items:center;
     flex-wrap:wrap;
-    gap:15px;
+    gap:12px;
     z-index:1000;
 }
+
 .resources-group,.stats-group {
     display:flex;
-    gap:12px;
+    gap:8px;
     align-items:center;
     flex-wrap:wrap;
 }
+
 .resource-item,.stat-item {
     background:rgba(20,20,25,.8);
-    padding:8px 14px;
+    padding:8px 12px;
     border-radius:8px;
     font-size:14px;
     font-weight:600;
@@ -56,40 +59,52 @@ body {
     align-items:center;
     gap:6px;
 }
+
 .resource-item span,.stat-item span {
     color:var(--accent-gold);
 }
+
 .action-btn {
     background:linear-gradient(135deg,#c0392b,#e74c3c);
     color:white;
     border:none;
-    padding:8px 16px;
+    padding:9px 14px;
     border-radius:8px;
     cursor:pointer;
     font-weight:bold;
+    margin:3px;
 }
+
+.action-btn:disabled,.small-btn:disabled {
+    opacity:.5;
+    cursor:not-allowed;
+}
+
 #main-container {
     display:flex;
     flex:1;
-    position:relative;
-    min-height:0;
+    min-height:550px;
 }
+
 #sidebar {
-    width:350px;
+    width:330px;
+    flex-shrink:0;
     background:var(--bg-panel);
     border-left:2px solid var(--border-color);
-    padding:20px;
+    padding:16px;
     overflow-y:auto;
     display:flex;
     flex-direction:column;
-    gap:20px;
+    gap:15px;
 }
+
 .panel-section {
     background:#1a1a22;
-    padding:16px;
+    padding:15px;
     border-radius:10px;
     border:1px solid var(--border-color);
 }
+
 .panel-section h3 {
     margin-bottom:12px;
     font-size:16px;
@@ -97,43 +112,52 @@ body {
     border-bottom:1px solid var(--border-color);
     padding-bottom:8px;
 }
+
 .upgrade-card {
     display:flex;
     justify-content:space-between;
     align-items:center;
+    gap:8px;
     margin-top:12px;
     background:#121217;
-    padding:10px 12px;
+    padding:10px;
     border-radius:8px;
 }
+
 .upgrade-card span {
     font-size:13px;
     color:var(--text-muted);
 }
+
 .small-btn {
     background:linear-gradient(135deg,#d35400,#e67e22);
     color:white;
     border:none;
-    padding:6px 12px;
+    padding:7px 10px;
     border-radius:6px;
     cursor:pointer;
     font-size:12px;
     font-weight:bold;
 }
+
 #map {
     flex:1;
-    height:100%;
+    min-width:0;
+    min-height:550px;
     background:#050507;
 }
+
 .leaflet-popup-content-wrapper {
     background:#1a1a24;
     color:#fff;
     border:1px solid var(--accent-gold);
     border-radius:8px;
 }
+
 .leaflet-popup-tip {
     background:#1a1a24;
 }
+
 #login-box {
     position:fixed;
     inset:0;
@@ -142,32 +166,72 @@ body {
     display:flex;
     align-items:center;
     justify-content:center;
+    padding:15px;
 }
+
 .login-card {
     background:#1a1a22;
     padding:25px;
-    border:1px solid #f39c12;
+    border:1px solid var(--accent-gold);
     border-radius:15px;
-    width:90%;
-    max-width:350px;
+    width:100%;
+    max-width:360px;
     text-align:center;
 }
+
 .login-card input {
     width:100%;
     padding:12px;
     margin:7px 0;
+    border-radius:7px;
+    border:1px solid #444;
+    background:#101017;
+    color:white;
+    font-size:15px;
 }
+
 #login-message {
     margin-top:12px;
-    color:#f39c12;
+    color:var(--accent-gold);
+    font-size:13px;
+    overflow-wrap:anywhere;
 }
+
+#player-info {
+    color:var(--text-muted);
+    font-size:13px;
+    margin-top:5px;
+}
+
 @media(max-width:750px) {
-    #top-bar {padding:10px;}
-    .resources-group,.stats-group {gap:6px;}
-    .resource-item,.stat-item {font-size:12px;padding:6px;}
-    #sidebar {width:180px;padding:10px;}
-    .panel-section {padding:10px;}
-    .panel-section h3 {font-size:13px;}
+    #top-bar {
+        padding:10px;
+    }
+
+    .resources-group,.stats-group {
+        gap:5px;
+    }
+
+    .resource-item,.stat-item {
+        font-size:11px;
+        padding:6px;
+    }
+
+    #main-container {
+        flex-direction:column;
+    }
+
+    #map {
+        min-height:380px;
+        flex:none;
+        height:50vh;
+    }
+
+    #sidebar {
+        width:100%;
+        border-left:none;
+        border-top:2px solid var(--border-color);
+    }
 }
 </style></head><body><div id="top-bar">
     <div class="resources-group">
@@ -182,59 +246,95 @@ body {
     <button class="action-btn" id="btn-leaders">غرفة القادة</button>
 </div>
 
-</div><div id="main-container">
-    <div id="map"></div><div id="sidebar">
+</div><div id="main-container"><div id="map"></div>
+
+<div id="sidebar">
+
     <div class="panel-section">
         <h3>🏛️ العاصمة الإمبراطورية</h3>
+
         <p style="font-size:14px;margin-bottom:8px">
             مستوى القصر الملكي:
             <b id="palace-level" style="color:var(--accent-gold)">2</b>
         </p>
+
         <div class="upgrade-card">
             <span>ترقية القصر (+500 قوة)</span>
-            <button class="small-btn" id="btn-upgrade-palace">ترقية (1000 مال)</button>
+            <button class="small-btn" id="btn-upgrade-palace">
+                ترقية (1000 مال)
+            </button>
         </div>
     </div>
 
     <div class="panel-section">
         <h3>✈️ قيادة القوات الجوية</h3>
+
         <p style="font-size:14px;margin-bottom:8px">
             المطارات النشطة:
             <b id="airport-count" style="color:var(--accent-blue)">2</b>
         </p>
+
         <div class="upgrade-card">
-            <span>إنشاء مطار حربي</span>
-            <button class="small-btn" id="btn-build-airport">بناء (600 نفط)</button>
+            <span>إنشاء مطار جديد</span>
+            <button class="small-btn" id="btn-build-airport">
+                بناء (600 نفط)
+            </button>
         </div>
     </div>
 
     <div class="panel-section">
-        <h3>📍 رادار العمليات الميدانية</h3>
+        <h3>📍 تقارير المناطق</h3>
         <p id="selected-region" style="font-size:13px;color:var(--text-muted)">
-            اختر محافظة من الخريطة لعرض التقارير...
+            اختر منطقة من الخريطة لعرض التقارير.
         </p>
     </div>
+
+    <div class="panel-section">
+        <h3>👤 حساب القائد</h3>
+        <p id="player-info">لم يتم تسجيل الدخول.</p>
+        <button class="action-btn" id="btn-logout">تسجيل الخروج</button>
+    </div>
+
 </div>
 
 </div><div id="login-box">
     <div class="login-card">
-        <h2 style="color:#f39c12;margin-bottom:20px">👑 العهد الأخير</h2>
-        <input id="player-name" placeholder="اسم اللاعب">
-        <input id="player-email" type="email" placeholder="البريد الإلكتروني" style="direction:ltr">
-        <input id="player-password" type="password" placeholder="كلمة المرور">
-        <button id="btn-register" class="action-btn">إنشاء حساب</button>
-        <button id="btn-login" class="action-btn">تسجيل الدخول</button>
-        <p id="login-message"></p>
-    </div>
+        <h2 style="color:#f39c12;margin-bottom:15px">👑 العهد الأخير</h2>    <input id="player-name" placeholder="اسم اللاعب">
+
+    <input
+        id="player-email"
+        type="email"
+        placeholder="البريد الإلكتروني"
+        style="direction:ltr"
+        autocomplete="email"
+    >
+
+    <input
+        id="player-password"
+        type="password"
+        placeholder="كلمة المرور"
+        autocomplete="current-password"
+    >
+
+    <button id="btn-register" class="action-btn">إنشاء حساب جديد</button>
+    <button id="btn-login" class="action-btn">تسجيل الدخول</button>
+
+    <p id="login-message"></p>
+</div>
+
 </div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+
 import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     onAuthStateChanged,
-    updateProfile
+    updateProfile,
+    signOut
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+
 import {
     getFirestore,
     doc,
@@ -242,6 +342,9 @@ import {
     getDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+
+/* Firebase configuration */
 
 const firebaseConfig = {
     apiKey:"AIzaSyCa5CpBhOs23W2_ElHFf3Z1OhOm6OFA6Vs",
@@ -258,208 +361,534 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let currentPlayer = null;
-let resources = {gold:8500,oil:3400,iron:2100,wood:4000};
-let stats = {power:7400,airforce:350,palaceLvl:2,airports:2};
 
-function updateUI() {
-    document.getElementById('res-gold').innerText = resources.gold;
-    document.getElementById('res-oil').innerText = resources.oil;
-    document.getElementById('res-iron').innerText = resources.iron;
-    document.getElementById('res-wood').innerText = resources.wood;
-    document.getElementById('stat-power').innerText = stats.power;
-    document.getElementById('stat-airforce').innerText = stats.airforce;
-    document.getElementById('palace-level').innerText = stats.palaceLvl;
-    document.getElementById('airport-count').innerText = stats.airports;
+/* Game data */
+
+let currentPlayer = null;
+
+let resources = {
+    gold:8500,
+    oil:3400,
+    iron:2100,
+    wood:4000
+};
+
+let stats = {
+    power:7400,
+    airforce:350,
+    palaceLvl:2,
+    airports:2
+};
+
+let gameLoaded = false;
+let authReady = false;
+
+
+/* HTML helpers */
+
+const $ = id => document.getElementById(id);
+
+function showMessage(message) {
+    $("login-message").innerText = message;
 }
 
-const map = L.map('map',{zoomControl:false}).setView([15.5527,48.5164],6);
-L.control.zoom({position:'bottomleft'}).addTo(map);
+function setAuthButtonsDisabled(disabled) {
+    $("btn-login").disabled = disabled;
+    $("btn-register").disabled = disabled;
+}
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
-    attribution:'&copy; THE LAST EMPIRE',
-    maxZoom:12,
-    minZoom:5
-}).addTo(map);
 
-const regions = [
-    {name:"العاصمة الملكية المركزية",coords:[15.3694,44.1910],color:"#e74c3c",control:"سيطرة الإمبراطورية"},
-    {name:"محافظة الشمال الاستراتيجية",coords:[16.8550,43.5500],color:"#f39c12",control:"منطقة استراتيجية"},
-    {name:"محافظة الشرق الاقتصادية",coords:[15.9680,48.7900],color:"#2ecc71",control:"إنتاج الموارد"},
-    {name:"محافظة الجنوب الساحلية",coords:[12.7937,45.0351],color:"#3498db",control:"قاعدة ساحلية"}
-];
+/* Update game interface */
 
-regions.forEach(reg=>{
-    const circle = L.circleMarker(reg.coords,{
-        radius:14,color:'#fff',weight:2,
-        fillColor:reg.color,fillOpacity:.9
-    }).addTo(map);
+function updateUI() {
+    $("res-gold").innerText = resources.gold;
+    $("res-oil").innerText = resources.oil;
+    $("res-iron").innerText = resources.iron;
+    $("res-wood").innerText = resources.wood;
 
-    circle.bindPopup(`<b>${reg.name}</b><br><span style="color:#bbb">الحالة:</span> ${reg.control}`);
+    $("stat-power").innerText = stats.power;
+    $("stat-airforce").innerText = stats.airforce;
 
-    circle.on('click',()=>{
-        document.getElementById('selected-region').innerHTML =
-        `<b style="color:var(--accent-gold)">${reg.name}</b><br>${reg.control}`;
-    });
-});
+    $("palace-level").innerText = stats.palaceLvl;
+    $("airport-count").innerText = stats.airports;
+}
+
+
+/* Default player data */
+
+function getDefaultPlayerData(user) {
+    return {
+        username:user.displayName || "قائد جديد",
+        gold:8500,
+        oil:3400,
+        iron:2100,
+        wood:4000,
+        power:7400,
+        airforce:350,
+        palaceLvl:2,
+        airports:2,
+        level:1,
+        experience:0,
+        createdAt:serverTimestamp()
+    };
+}
+
+
+/* Save game */
 
 async function saveGameData() {
-    if(!currentPlayer) return;
+
+    if (!currentPlayer || !gameLoaded) {
+        showMessage("لم يتم تحميل بيانات اللاعب بعد.");
+        return false;
+    }
+
     try {
-        await setDoc(doc(db,"players",currentPlayer.uid),{
-            gold: resources.gold,
-            oil: resources.oil,
-            iron: resources.iron,
-            wood: resources.wood,
-            power: stats.power,
-            airforce: stats.airforce,
-            palaceLvl: stats.palaceLvl,
-            airports: stats.airports,
-            updatedAt: serverTimestamp()
-        },{merge:true});
+
+        const playerData = {
+            gold:resources.gold,
+            oil:resources.oil,
+            iron:resources.iron,
+            wood:resources.wood,
+
+            power:stats.power,
+            airforce:stats.airforce,
+            palaceLvl:stats.palaceLvl,
+            airports:stats.airports,
+
+            updatedAt:serverTimestamp()
+        };
+
+        await setDoc(
+            doc(db,"players",currentPlayer.uid),
+            playerData,
+            {merge:true}
+        );
+
+        return true;
+
     } catch(error) {
-        console.error("خطأ في الحفظ:", error);
+
+        console.error("Save error:",error);
+
+        alert(
+            "تعذر حفظ اللعبة.\n" +
+            "رمز الخطأ: " + (error.code || error.message)
+        );
+
+        return false;
     }
 }
 
-async function loadGameData(user) {
-    const ref = doc(db,"players",user.uid);
-    const snapshot = await getDoc(ref);
 
-    if(!snapshot.exists()) {
-        await setDoc(ref,{
-            username: user.displayName || "قائد جديد",
-            gold: 8500,
-            oil: 3400,
-            iron: 2100,
-            wood: 4000,
-            power: 7400,
-            airforce: 350,
-            palaceLvl: 2,
-            airports: 2,
-            level: 1,
-            experience: 0,
-            createdAt: serverTimestamp()
-        },{merge:true});
+/* Load game */
+
+async function loadGameData(user) {
+
+    const playerRef = doc(db,"players",user.uid);
+
+    const snapshot = await getDoc(playerRef);
+
+    let data;
+
+    if (!snapshot.exists()) {
+
+        data = getDefaultPlayerData(user);
+
+        await setDoc(playerRef,data,{merge:true});
+
+    } else {
+
+        data = snapshot.data();
+
+        const defaults = {
+            gold:8500,
+            oil:3400,
+            iron:2100,
+            wood:4000,
+            power:7400,
+            airforce:350,
+            palaceLvl:2,
+            airports:2,
+            level:1,
+            experience:0,
+            username:user.displayName || "قائد جديد"
+        };
+
+        const missing = {};
+
+        for (const key in defaults) {
+            if (data[key] === undefined || data[key] === null) {
+                missing[key] = defaults[key];
+            }
+        }
+
+        if (Object.keys(missing).length > 0) {
+            await setDoc(playerRef,missing,{merge:true});
+        }
+
+        data = {...defaults,...data,...missing};
+    }
+
+    resources.gold = Number(data.gold);
+    resources.oil = Number(data.oil);
+    resources.iron = Number(data.iron);
+    resources.wood = Number(data.wood);
+
+    stats.power = Number(data.power);
+    stats.airforce = Number(data.airforce);
+    stats.palaceLvl = Number(data.palaceLvl);
+    stats.airports = Number(data.airports);
+
+    updateUI();
+
+    gameLoaded = true;
+}
+
+
+/* Map */
+
+const map = L.map("map",{
+    zoomControl:false
+}).setView([15.5527,48.5164],6);
+
+L.control.zoom({
+    position:"bottomleft"
+}).addTo(map);
+
+L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    {
+        attribution:"&copy; THE LAST EMPIRE",
+        maxZoom:12,
+        minZoom:5
+    }
+).addTo(map);
+
+
+const regions = [
+    {
+        name:"العاصمة الملكية المركزية",
+        coords:[15.3694,44.1910],
+        color:"#e74c3c",
+        control:"سيطرة الإمبراطورية"
+    },
+    {
+        name:"محافظة الشمال الاستراتيجية",
+        coords:[16.8550,43.5500],
+        color:"#f39c12",
+        control:"منطقة استراتيجية"
+    },
+    {
+        name:"محافظة الشرق الاقتصادية",
+        coords:[15.9680,48.7900],
+        color:"#2ecc71",
+        control:"إنتاج الموارد"
+    },
+    {
+        name:"محافظة الجنوب الساحلية",
+        coords:[12.7937,45.0351],
+        color:"#3498db",
+        control:"قاعدة ساحلية"
+    }
+];
+
+
+regions.forEach(region => {
+
+    const circle = L.circleMarker(region.coords,{
+        radius:14,
+        color:"#fff",
+        weight:2,
+        fillColor:region.color,
+        fillOpacity:.9
+    }).addTo(map);
+
+    circle.bindPopup(
+        `<b>${region.name}</b><br>
+        <span style="color:#bbb">الحالة:</span>
+        ${region.control}`
+    );
+
+    circle.on("click",() => {
+
+        $("selected-region").innerHTML =
+            `<b style="color:var(--accent-gold)">
+            ${region.name}</b><br>${region.control}`;
+
+    });
+
+});
+
+
+/* Palace upgrade */
+
+$("btn-upgrade-palace").addEventListener("click",async () => {
+
+    if (!currentPlayer || !gameLoaded) {
+        alert("سجل الدخول أولاً.");
         return;
     }
 
-    const data = snapshot.data();
-    resources.gold = Number(data.gold ?? 8500);
-    resources.oil = Number(data.oil ?? 3400);
-    resources.iron = Number(data.iron ?? 2100);
-    resources.wood = Number(data.wood ?? 4000);
+    if (resources.gold < 1000) {
+        alert("تحتاج إلى 1000 مال.");
+        return;
+    }
 
-    stats.power = Number(data.power ?? 7400);
-    stats.airforce = Number(data.airforce ?? 350);
-    stats.palaceLvl = Number(data.palaceLvl ?? 2);
-    stats.airports = Number(data.airports ?? 2);
+    resources.gold -= 1000;
+    stats.palaceLvl++;
+    stats.power += 500;
 
     updateUI();
-}
 
-// Event Listeners for Game Actions & Auth
-document.getElementById('btn-upgrade-palace').addEventListener('click', () => {
-    if(resources.gold >= 1000) {
-        resources.gold -= 1000;
-        stats.palaceLvl++;
-        stats.power += 500;
-        updateUI();
-        saveGameData();
-        alert("✨ تم ترقية القصر الملكي بنجاح!");
-    } else {
-        alert("⚠️ تحتاج إلى 1000 مال.");
+    const saved = await saveGameData();
+
+    if (saved) {
+        alert("✨ تم تطوير القصر وحفظ البيانات بنجاح!");
     }
+
 });
 
-document.getElementById('btn-build-airport').addEventListener('click', () => {
-    if(resources.oil >= 600) {
-        resources.oil -= 600;
-        stats.airports++;
-        stats.airforce += 120;
-        stats.power += 350;
-        updateUI();
-        saveGameData();
-        alert("✈️ تم إنشاء مطار جديد!");
-    } else {
-        alert("⚠️ تحتاج إلى 600 نفط.");
+
+/* Airport construction */
+
+$("btn-build-airport").addEventListener("click",async () => {
+
+    if (!currentPlayer || !gameLoaded) {
+        alert("سجل الدخول أولاً.");
+        return;
     }
+
+    if (resources.oil < 600) {
+        alert("تحتاج إلى 600 نفط.");
+        return;
+    }
+
+    resources.oil -= 600;
+    stats.airports++;
+    stats.airforce += 120;
+    stats.power += 350;
+
+    updateUI();
+
+    const saved = await saveGameData();
+
+    if (saved) {
+        alert("✈️ تم بناء المطار وحفظ البيانات بنجاح!");
+    }
+
 });
 
-document.getElementById('btn-alliance').addEventListener('click', () => {
+
+/* Alliance button */
+
+$("btn-alliance").addEventListener("click",() => {
     alert("🌐 نظام التحالفات قيد التطوير.");
 });
 
-document.getElementById('btn-leaders').addEventListener('click', () => {
+
+/* Leaders button */
+
+$("btn-leaders").addEventListener("click",() => {
     alert("🎖️ غرفة القادة قيد التطوير.");
 });
 
-document.getElementById('btn-register').addEventListener('click', async () => {
-    const name = document.getElementById("player-name").value.trim();
-    const email = document.getElementById("player-email").value.trim();
-    const password = document.getElementById("player-password").value;
-    const message = document.getElementById("login-message");
 
-    if(!name || !email || password.length < 6) {
-        message.innerText = "أدخل الاسم والبريد وكلمة مرور من 6 أحرف على الأقل.";
+/* Register */
+
+$("btn-register").addEventListener("click",async () => {
+
+    if (!authReady) {
+        showMessage("انتظر حتى يتم الاتصال بخدمة الحسابات.");
         return;
     }
 
-    try {
-        const result = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(result.user, {displayName: name});
+    const name = $("player-name").value.trim();
+    const email = $("player-email").value.trim();
+    const password = $("player-password").value;
 
-        await setDoc(doc(db,"players", result.user.uid), {
-            username: name,
-            gold: 8500,
-            oil: 3400,
-            iron: 2100,
-            wood: 4000,
-            power: 7400,
-            airforce: 350,
-            palaceLvl: 2,
-            airports: 2,
-            level: 1,
-            experience: 0,
-            createdAt: serverTimestamp()
+    if (!name || !email || password.length < 6) {
+        showMessage("أدخل الاسم والبريد وكلمة مرور من 6 أحرف على الأقل.");
+        return;
+    }
+
+    setAuthButtonsDisabled(true);
+    showMessage("جارٍ إنشاء الحساب...");
+
+    try {
+
+        const result = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        await updateProfile(result.user,{
+            displayName:name
         });
 
-        message.innerText = "تم إنشاء الحساب بنجاح!";
+        await setDoc(
+            doc(db,"players",result.user.uid),
+            getDefaultPlayerData(result.user),
+            {merge:true}
+        );
+
+        showMessage("تم إنشاء الحساب بنجاح!");
+
     } catch(error) {
-        message.innerText = "تعذر إنشاء الحساب: " + error.message;
+
+        console.error("Registration error:",error);
+
+        showMessage(
+            "تعذر إنشاء الحساب: " +
+            getFriendlyAuthError(error)
+        );
+
+    } finally {
+        setAuthButtonsDisabled(false);
     }
+
 });
 
-document.getElementById('btn-login').addEventListener('click', async () => {
-    const email = document.getElementById("player-email").value.trim();
-    const password = document.getElementById("player-password").value;
-    const message = document.getElementById("login-message");
+
+/* Login */
+
+$("btn-login").addEventListener("click",async () => {
+
+    if (!authReady) {
+        showMessage("انتظر حتى يتم الاتصال بخدمة الحسابات.");
+        return;
+    }
+
+    const email = $("player-email").value.trim();
+    const password = $("player-password").value;
+
+    if (!email || !password) {
+        showMessage("أدخل البريد الإلكتروني وكلمة المرور.");
+        return;
+    }
+
+    setAuthButtonsDisabled(true);
+    showMessage("جارٍ تسجيل الدخول...");
 
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+
+        await signInWithEmailAndPassword(
+            auth,
+            email,
+            password
+        );
+
+        showMessage("تم تسجيل الدخول بنجاح.");
+
     } catch(error) {
-        message.innerText = "تعذر تسجيل الدخول: " + error.message;
+
+        console.error("Login error:",error);
+
+        showMessage(
+            "تعذر تسجيل الدخول: " +
+            getFriendlyAuthError(error)
+        );
+
+    } finally {
+        setAuthButtonsDisabled(false);
     }
+
 });
 
-onAuthStateChanged(auth, async user => {
-    const box = document.getElementById("login-box");
+
+/* Friendly Firebase error messages */
+
+function getFriendlyAuthError(error) {
+
+    const code = error.code || "";
+
+    const errors = {
+        "auth/invalid-email":"البريد الإلكتروني غير صحيح.",
+        "auth/user-not-found":"لا يوجد حساب بهذا البريد.",
+        "auth/wrong-password":"كلمة المرور غير صحيحة.",
+        "auth/invalid-credential":"بيانات الدخول غير صحيحة.",
+        "auth/email-already-in-use":"هذا البريد مسجل مسبقاً.",
+        "auth/weak-password":"كلمة المرور ضعيفة؛ استخدم 6 أحرف على الأقل.",
+        "auth/operation-not-allowed":"يجب تفعيل Email/Password في Firebase.",
+        "auth/network-request-failed":"تحقق من اتصال الإنترنت.",
+        "auth/too-many-requests":"محاولات كثيرة. انتظر قليلاً ثم حاول مجدداً.",
+        "auth/unauthorized-domain":"يجب إضافة نطاق موقع اللعبة إلى Authorized domains في Firebase.",
+        "permission-denied":"تم رفض الوصول إلى قاعدة البيانات. راجع Firestore Rules."
+    };
+
+    return errors[code] || error.message || "حدث خطأ غير معروف.";
+}
+
+
+/* Logout */
+
+$("btn-logout").addEventListener("click",async () => {
+
+    try {
+        await signOut(auth);
+        gameLoaded = false;
+        currentPlayer = null;
+    } catch(error) {
+        alert("تعذر تسجيل الخروج: " + error.message);
+    }
+
+});
+
+
+/* Authentication state */
+
+onAuthStateChanged(auth,async user => {
+
+    const box = $("login-box");
+
     currentPlayer = user;
+    gameLoaded = false;
 
-    if(user) {
-        try {
-            await loadGameData(user);
-            box.style.display = "none";
-        } catch(error) {
-            currentPlayer = null;
-            box.style.display = "flex";
-            document.getElementById("login-message").innerText = "تعذر تحميل البيانات: " + error.message;
-        }
-    } else {
+    if (!user) {
+
         box.style.display = "flex";
+        $("player-info").innerText = "لم يتم تسجيل الدخول.";
+        authReady = true;
+
+        return;
     }
+
+    // نجاح المصادقة مستقل عن تحميل بيانات اللعبة
+    box.style.display = "none";
+
+    $("player-info").innerText =
+        "القائد: " + (user.displayName || user.email);
+
+    authReady = true;
+
+    try {
+
+        await loadGameData(user);
+
+        $("selected-region").innerText =
+            "مرحباً بك أيها القائد. اختر منطقة من الخريطة.";
+
+    } catch(error) {
+
+        console.error("Game loading error:",error);
+
+        gameLoaded = false;
+
+        alert(
+            "تم تسجيل الدخول، لكن تعذر تحميل بيانات اللعبة.\n" +
+            "رمز الخطأ: " + (error.code || error.message) +
+            "\nتحقق من صلاحيات Firestore."
+        );
+
+    }
+
 });
+
+
+/* Initial interface */
 
 updateUI();
+
 </script></body>
 </html>
