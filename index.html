@@ -1,801 +1,372 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>THE LAST EMPIRE - الإمبراطورية الأخيرة</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>
-:root {
-    --bg-main:#0a0a0c;
-    --bg-panel:#141419;
-    --border-color:#2a2a35;
-    --accent-gold:#f39c12;
-    --accent-red:#e74c3c;
-    --accent-blue:#3498db;
-    --text-main:#ecf0f1;
-    --text-muted:#95a5a6;
-}
-* {
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    font-family:'Segoe UI',Tahoma,sans-serif;
-}
-body {
-    background:var(--bg-main);
-    color:var(--text-main);
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-}
-#top-bar {
-    background:linear-gradient(to bottom,#1a1a24,#101017);
-    border-bottom:2px solid var(--accent-gold);
-    padding:12px 20px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:12px;
-}
-.resources-group,.stats-group {
-    display:flex;
-    gap:8px;
-    align-items:center;
-    flex-wrap:wrap;
-}
-.resource-item,.stat-item {
-    background:rgba(20,20,25,.8);
-    padding:8px 12px;
-    border-radius:8px;
-    font-size:14px;
-    font-weight:600;
-    border:1px solid var(--border-color);
-    display:flex;
-    align-items:center;
-    gap:6px;
-}
-.resource-item span,.stat-item span {
-    color:var(--accent-gold);
-}
-.action-btn {
-    background:linear-gradient(135deg,#c0392b,#e74c3c);
-    color:white;
-    border:none;
-    padding:9px 14px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:bold;
-    margin:3px;
-}
-.action-btn:disabled,.small-btn:disabled {
-    opacity:.5;
-    cursor:not-allowed;
-}
-#main-container {
-    display:flex;
-    flex:1;
-    min-height:550px;
-}
-#sidebar {
-    width:330px;
-    flex-shrink:0;
-    background:var(--bg-panel);
-    border-left:2px solid var(--border-color);
-    padding:16px;
-    overflow-y:auto;
-    display:flex;
-    flex-direction:column;
-    gap:15px;
-}
-.panel-section {
-    background:#1a1a22;
-    padding:15px;
-    border-radius:10px;
-    border:1px solid var(--border-color);
-}
-.panel-section h3 {
-    margin-bottom:12px;
-    font-size:16px;
-    color:var(--accent-gold);
-    border-bottom:1px solid var(--border-color);
-    padding-bottom:8px;
-}
-.upgrade-card {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:8px;
-    margin-top:12px;
-    background:#121217;
-    padding:10px;
-    border-radius:8px;
-}
-.upgrade-card span {
-    font-size:13px;
-    color:var(--text-muted);
-}
-.small-btn {
-    background:linear-gradient(135deg,#d35400,#e67e22);
-    color:white;
-    border:none;
-    padding:7px 10px;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:12px;
-    font-weight:bold;
-}
-#map {
-    flex:1;
-    min-width:0;
-    min-height:550px;
-    background:#050507;
-}
-.leaflet-popup-content-wrapper {
-    background:#1a1a24;
-    color:#fff;
-    border:1px solid var(--accent-gold);
-    border-radius:8px;
-}
-.leaflet-popup-tip {
-    background:#1a1a24;
-}
-#login-box {
-    position:fixed;
-    inset:0;
-    background:#0a0a0c;
-    z-index:9999;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:15px;
-}
-.login-card {
-    background:#1a1a22;
-    padding:25px;
-    border:1px solid var(--accent-gold);
-    border-radius:15px;
-    width:100%;
-    max-width:360px;
-    text-align:center;
-}
-.login-card input {
-    width:100%;
-    padding:12px;
-    margin:7px 0;
-    border-radius:7px;
-    border:1px solid #444;
-    background:#101017;
-    color:white;
-    font-size:15px;
-}
-#login-message {
-    margin-top:12px;
-    color:var(--accent-gold);
-    font-size:13px;
-    overflow-wrap:anywhere;
-}
-#player-info {
-    color:var(--text-muted);
-    font-size:13px;
-    margin-top:5px;
-}
-@media(max-width:750px) {
-    #top-bar {padding:10px}
-    .resources-group,.stats-group {gap:5px}
-    .resource-item,.stat-item {
-        font-size:11px;
-        padding:6px;
-    }
-    #main-container {flex-direction:column}
-    #map {
-        min-height:380px;
-        flex:none;
-        height:50vh;
-    }
-    #sidebar {
-        width:100%;
-        border-left:none;
-        border-top:2px solid var(--border-color);
-    }
-}
-</style></head><body><div id="top-bar">
-    <div class="resources-group">
-        <div class="resource-item">💰 المال: <span id="res-gold">8500</span></div>
-        <div class="resource-item">🛢️ النفط: <span id="res-oil">3400</span></div>
-        <div class="resource-item">⚙️ الحديد: <span id="res-iron">2100</span></div>
-        <div class="resource-item">🪵 الخشب: <span id="res-wood">4000</span></div>
-    </div><div class="stats-group">
-    <div class="stat-item">🎖️ القوة: <span id="stat-power">7400</span></div>
-    <div class="stat-item">✈️ الجوية: <span id="stat-airforce">350</span></div>
-    <button class="action-btn" id="btn-alliance">التحالفات</button>
-    <button class="action-btn" id="btn-leaders">غرفة القادة</button>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101820;color:#f5e6bd;font-family:Arial,sans-serif}
+header{background:#172633;padding:15px;text-align:center;border-bottom:2px solid #b58b3b}
+h1{margin:0;color:#e9c46a;font-size:24px}
+nav{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;padding:10px;background:#1c2b36}
+button{background:#a77b2e;color:white;border:0;border-radius:8px;padding:11px 15px;cursor:pointer;font-weight:bold}
+button:hover{background:#c99b45}
+button:disabled{opacity:.5;cursor:not-allowed}
+main{padding:12px;max-width:1100px;margin:auto}
+.panel{background:#1b2b37;border:1px solid #735b32;border-radius:12px;padding:14px;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:#263a48;padding:12px;border-radius:8px;text-align:center}
+.stat b{display:block;color:#e9c46a;margin-top:6px}
+#map{height:390px;border-radius:12px;z-index:1}
+.hidden{display:none!important}
+input,select{width:100%;padding:12px;margin:6px 0;border-radius:7px;border:1px solid #8c7546;background:#f5f1e7;color:#17212a}
+#loginBox{position:fixed;inset:0;background:#081018ed;z-index:10;display:flex;align-items:center;justify-content:center;padding:15px}
+.loginCard{width:100%;max-width:390px;background:#1b2b37;padding:22px;border-radius:14px;border:1px solid #b58b3b}
+.loginCard h2{text-align:center;color:#e9c46a}
+.loginCard button{width:100%;margin-top:8px}
+#message{min-height:24px;color:#ffd27a;font-size:14px;line-height:1.6}
+#dialog{position:fixed;inset:0;background:#000b;z-index:20;display:flex;align-items:center;justify-content:center;padding:15px}
+.dialogCard{background:#203442;border:1px solid #c49a45;padding:20px;border-radius:12px;width:100%;max-width:400px}
+.item{padding:10px;border-bottom:1px solid #46515a}
+.small{font-size:13px;color:#c9c0a7}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}#map{height:320px}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>THE LAST EMPIRE</h1>
+<div>الإمبراطورية الأخيرة</div>
+</header>
+
+<div id="loginBox">
+ <div class="loginCard">
+  <h2>دخول الإمبراطورية</h2>
+  <input id="username" placeholder="اسم القائد" maxlength="20">
+  <input id="email" type="email" placeholder="البريد الإلكتروني">
+  <input id="password" type="password" placeholder="كلمة المرور">
+  <button id="registerBtn">إنشاء حساب جديد</button>
+  <button id="loginBtn">تسجيل الدخول</button>
+  <p id="message" role="status"></p>
+  <p class="small">استخدم بريدك وكلمة مرورك، ولا تشارك كلمة المرور مع أي شخص.</p>
+ </div>
 </div>
 
-</div><div id="main-container">
-    <div id="map"></div><div id="sidebar">
-    <div class="panel-section">
-        <h3>🏛️ العاصمة الإمبراطورية</h3>
-        <p style="font-size:14px;margin-bottom:8px">
-            مستوى القصر الملكي:
-            <b id="palace-level" style="color:var(--accent-gold)">2</b>
-        </p>
-        <div class="upgrade-card">
-            <span>ترقية القصر (+500 قوة)</span>
-            <button class="small-btn" id="btn-upgrade-palace">ترقية (1000 مال)</button>
-        </div>
-    </div>
+<nav>
+ <button id="mapBtn">الخريطة</button>
+ <button id="cityBtn">مدينتي</button>
+ <button id="palaceBtn">القصر</button>
+ <button id="armyBtn">القوات</button>
+ <button id="logoutBtn">تسجيل الخروج</button>
+</nav>
 
-    <div class="panel-section">
-        <h3>✈️ قيادة القوات الجوية</h3>
-        <p style="font-size:14px;margin-bottom:8px">
-            المطارات النشطة:
-            <b id="airport-count" style="color:var(--accent-blue)">2</b>
-        </p>
-        <div class="upgrade-card">
-            <span>إنشاء مطار جديد</span>
-            <button class="small-btn" id="btn-build-airport">بناء (600 نفط)</button>
-        </div>
-    </div>
+<main>
+ <section class="panel">
+  <div id="playerLabel">القائد: زائر</div>
+  <div class="stats">
+   <div class="stat">الذهب<b id="gold">0</b></div>
+   <div class="stat">النفط<b id="oil">0</b></div>
+   <div class="stat">الحديد<b id="iron">0</b></div>
+   <div class="stat">الخشب<b id="wood">0</b></div>
+  </div>
+  <div class="stats" style="margin-top:8px">
+   <div class="stat">القوة<b id="power">0</b></div>
+   <div class="stat">القوات الجوية<b id="air">0</b></div>
+   <div class="stat">القوات البحرية<b id="navy">0</b></div>
+   <div class="stat">القوات البرية<b id="land">0</b></div>
+  </div>
+ </section>
 
-    <div class="panel-section">
-        <h3>📍 تقارير المناطق</h3>
-        <p id="selected-region" style="font-size:13px;color:var(--text-muted)">
-            اختر منطقة من الخريطة لعرض التقارير.
-        </p>
-    </div>
+ <section id="mapSection" class="panel">
+  <h3>خريطة العالم العربي</h3>
+  <p class="small">اختر علامة دولة لعرض اسمها ومعلوماتها.</p>
+  <div id="map"></div>
+  <div id="countryInfo">اختر دولة من الخريطة.</div>
+ </section>
 
-    <div class="panel-section">
-        <h3>👤 حساب القائد</h3>
-        <p id="player-info">لم يتم تسجيل الدخول.</p>
-        <button class="action-btn" id="btn-reload">إعادة تحميل البيانات</button>
-        <button class="action-btn" id="btn-logout">تسجيل الخروج</button>
-    </div>
+ <section id="citySection" class="panel hidden">
+  <h2>مدينتك الرئيسية</h2>
+  <p>🏰 القصر الملكي</p>
+  <p>🏘️ الأحياء السكنية</p>
+  <p>🌾 المزارع</p>
+  <p>🏭 المصانع</p>
+  <p>اضغط على القصر لعرض التطويرات.</p>
+  <button id="cityPalaceBtn">فتح القصر</button>
+ </section>
+
+ <section id="palaceSection" class="panel hidden">
+  <h2>القصر الملكي</h2>
+  <p>مستوى القصر: <b id="palaceLevel">1</b></p>
+  <p>تكلفة التطوير: 1000 ذهب</p>
+  <button id="upgradeBtn">تطوير القصر</button>
+ </section>
+
+ <section id="armySection" class="panel hidden">
+  <h2>القوات الإمبراطورية</h2>
+  <div class="item">القوات البرية: <b id="land2">0</b>
+   <button id="trainLand">تدريب (200 ذهب)</button></div>
+  <div class="item">القوات الجوية: <b id="air2">0</b>
+   <button id="trainAir">تدريب (300 نفط)</button></div>
+  <div class="item">القوات البحرية: <b id="navy2">0</b>
+   <button id="trainNavy">تدريب (250 حديد)</button></div>
+  <p class="small">هذه أرقام ووحدات خيالية داخل اللعبة فقط.</p>
+ </section>
+
+ <section class="panel">
+  <h3>حالة الاتصال</h3>
+  <p id="status">بانتظار تسجيل الدخول...</p>
+  <button id="reloadBtn">إعادة تحميل بياناتي</button>
+ </section>
+</main>
+
+<div id="dialog" class="hidden">
+ <div class="dialogCard">
+  <h3 id="dialogTitle">معلومات</h3>
+  <p id="dialogText"></p>
+  <button id="closeDialog">إغلاق</button>
+ </div>
 </div>
 
-</div><div id="login-box">
-    <div class="login-card">
-        <h2 style="color:#f39c12;margin-bottom:15px">👑 العهد الأخير</h2>    <input id="player-name" placeholder="اسم اللاعب">
+<script>
+window.addEventListener("error",e=>{
+ const m=document.getElementById("message");
+ if(m)m.textContent="خطأ في تشغيل الصفحة: "+(e.message||"خطأ JavaScript");
+});
+window.addEventListener("unhandledrejection",e=>{
+ const m=document.getElementById("message");
+ if(m)m.textContent="حدث خطأ: "+(e.reason?.message||"تعذر تنفيذ العملية");
+});
+</script>
 
-    <input id="player-email" type="email"
-           placeholder="البريد الإلكتروني"
-           style="direction:ltr"
-           autocomplete="email">
-
-    <input id="player-password" type="password"
-           placeholder="كلمة المرور"
-           autocomplete="current-password">
-
-    <button id="btn-register" class="action-btn">إنشاء حساب جديد</button>
-    <button id="btn-login" class="action-btn">تسجيل الدخول</button>
-    <p id="login-message"></p>
-</div>
-
-</div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
-
+<script type="module">
+import {initializeApp}
+ from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
 import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    onAuthStateChanged,
-    updateProfile,
-    signOut
+ getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,
+ onAuthStateChanged,updateProfile,signOut
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-
 import {
-    getFirestore,
-    doc,
-    setDoc,
-    getDoc,
-    serverTimestamp
+ getFirestore,doc,getDoc,setDoc,serverTimestamp
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
-
-/* Firebase */
-
-const firebaseConfig = {
-    apiKey:"AIzaSyCa5CpBhOs23W2_ElHFf3Z1OhOm6OFA6Vs",
-    authDomain:"arab-empires-d2bef.firebaseapp.com",
-    databaseURL:"https://arab-empires-d2bef-default-rtdb.firebaseio.com",
-    projectId:"arab-empires-d2bef",
-    storageBucket:"arab-empires-d2bef.firebasestorage.app",
-    messagingSenderId:"858076630183",
-    appId:"1:858076630183:web:d7c01eb49a06216a2e5f82",
-    measurementId:"G-X45J3E995D"
+const firebaseConfig={
+ apiKey:"AIzaSyCa5CpBhOs23W2_W2ElHFf3Z1OhOm6OFA6Vs",
+ authDomain:"arab-empires-d2bef.firebaseapp.com",
+ databaseURL:"https://arab-empires-d2bef-default-rtdb.firebaseio.com",
+ projectId:"arab-empires-d2bef",
+ storageBucket:"arab-empires-d2bef.firebasestorage.app",
+ messagingSenderId:"858076630183",
+ appId:"1:858076630183:web:d7c01eb49a06216a2e5f82",
+ measurementId:"G-X45J3E995D"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
 
-
-/* حالة اللعبة */
-
-let currentPlayer = null;
-let gameLoaded = false;
-let authReady = false;
-let loadingPlayer = false;
-
-let resources = {
-    gold:8500,
-    oil:3400,
-    iron:2100,
-    wood:4000
+const $=id=>document.getElementById(id);
+let currentPlayer=null;
+let gameLoaded=false;
+let game={
+ gold:8500,oil:3400,iron:2100,wood:4000,
+ power:7400,air:350,navy:100,land:500,palaceLevel:1
 };
 
-let stats = {
-    power:7400,
-    airforce:350,
-    palaceLvl:2,
-    airports:2
-};
+function message(t){$("message").textContent=t}
+function status(t){$("status").textContent=t}
+function showDialog(title,text){
+ $("dialogTitle").textContent=title;
+ $("dialogText").textContent=text;
+ $("dialog").classList.remove("hidden");
+}
+function hideDialog(){$("dialog").classList.add("hidden")}
 
-const $ = id => document.getElementById(id);
-
-function showMessage(message) {
-    $("login-message").innerText = message;
+function explainError(error){
+ const code=error?.code||"";
+ const messages={
+  "auth/email-already-in-use":"هذا البريد مسجل بالفعل. جرّب تسجيل الدخول.",
+  "auth/invalid-email":"البريد الإلكتروني غير صحيح.",
+  "auth/weak-password":"كلمة المرور قصيرة جدًا. استخدم 6 أحرف على الأقل.",
+  "auth/invalid-credential":"البريد أو كلمة المرور غير صحيحة.",
+  "auth/user-not-found":"لا يوجد حساب بهذا البريد.",
+  "auth/wrong-password":"كلمة المرور غير صحيحة.",
+  "auth/too-many-requests":"محاولات كثيرة. انتظر قليلًا ثم حاول.",
+  "auth/unauthorized-domain":"هذا النطاق غير مسموح. أضف نطاق GitHub Pages إلى Authorized domains في Firebase.",
+  "permission-denied":"رفضت قواعد Firestore العملية. تحقق من قواعد players وانشرها.",
+  "unavailable":"تعذر الاتصال. تحقق من الإنترنت وحاول مجددًا."
+ };
+ return messages[code]||("تعذر إكمال العملية: "+(error?.message||code||"خطأ غير معروف"));
 }
 
-function setAuthButtonsDisabled(disabled) {
-    $("btn-login").disabled = disabled;
-    $("btn-register").disabled = disabled;
+function render(){
+ for(const key of ["gold","oil","iron","wood","power","air","navy","land","palaceLevel"]){
+  $(key).textContent=game[key]??0;
+ }
+ $("air2").textContent=game.air;
+ $("navy2").textContent=game.navy;
+ $("land2").textContent=game.land;
 }
 
-function updateUI() {
-    $("res-gold").innerText = resources.gold;
-    $("res-oil").innerText = resources.oil;
-    $("res-iron").innerText = resources.iron;
-    $("res-wood").innerText = resources.wood;
-
-    $("stat-power").innerText = stats.power;
-    $("stat-airforce").innerText = stats.airforce;
-
-    $("palace-level").innerText = stats.palaceLvl;
-    $("airport-count").innerText = stats.airports;
+async function loadGameData(user){
+ gameLoaded=false;
+ status("جارٍ تحميل بيانات القائد...");
+ const ref=doc(db,"players",user.uid);
+ const snap=await getDoc(ref);
+ if(snap.exists()){
+  const data=snap.data();
+  for(const key of Object.keys(game)){
+   if(typeof data[key]==="number")game[key]=data[key];
+  }
+ }else{
+  await setDoc(ref,{
+   username:user.displayName||"قائد جديد",
+   ...game,createdAt:serverTimestamp()
+  });
+ }
+ await setDoc(ref,{
+  username:user.displayName||"قائد جديد",
+  lastSeen:serverTimestamp()
+ },{merge:true});
+ gameLoaded=true;
+ render();
+ status("تم تحميل بياناتك وحفظها بنجاح.");
 }
 
-function getDefaultPlayerData(user) {
-    return {
-        username:user.displayName || "قائد جديد",
-        gold:8500,
-        oil:3400,
-        iron:2100,
-        wood:4000,
-        power:7400,
-        airforce:350,
-        palaceLvl:2,
-        airports:2,
-        level:1,
-        experience:0,
-        createdAt:serverTimestamp()
-    };
+async function saveGameData(){
+ if(!auth.currentUser||!gameLoaded){
+  throw new Error("بيانات اللاعب لم تكتمل بعد. انتظر تحميلها.");
+ }
+ const ref=doc(db,"players",auth.currentUser.uid);
+ const payload={...game,updatedAt:serverTimestamp()};
+ await setDoc(ref,payload,{merge:true});
 }
 
-function validNumber(value, fallback) {
-    const number = Number(value);
-    return Number.isFinite(number) ? number : fallback;
+async function doRegister(){
+ const name=$("username").value.trim();
+ const email=$("email").value.trim();
+ const password=$("password").value;
+ if(name.length<2){message("اكتب اسم قائد من حرفين على الأقل.");return}
+ if(!email||!email.includes("@")){message("اكتب بريدًا إلكترونيًا صحيحًا.");return}
+ if(password.length<6){message("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");return}
+ const btn=$("registerBtn");
+ btn.disabled=true;message("جارٍ إنشاء الحساب...");
+ try{
+  const result=await createUserWithEmailAndPassword(auth,email,password);
+  await updateProfile(result.user,{displayName:name});
+  await setDoc(doc(db,"players",result.user.uid),{
+   username:name,...game,createdAt:serverTimestamp()
+  },{merge:true});
+  message("تم إنشاء الحساب بنجاح.");
+ }catch(e){message(explainError(e))}
+ finally{btn.disabled=false}
 }
 
-
-/* تحميل بيانات اللاعب */
-
-async function loadGameData(user) {
-    if (!user || !user.uid) {
-        throw new Error("لا يوجد مستخدم مسجل الدخول.");
-    }
-
-    const playerRef = doc(db,"players",user.uid);
-    const snapshot = await getDoc(playerRef);
-
-    const defaults = {
-        gold:8500,
-        oil:3400,
-        iron:2100,
-        wood:4000,
-        power:7400,
-        airforce:350,
-        palaceLvl:2,
-        airports:2,
-        level:1,
-        experience:0,
-        username:user.displayName || "قائد جديد"
-    };
-
-    let data;
-
-    if (!snapshot.exists()) {
-        data = {
-            ...getDefaultPlayerData(user)
-        };
-
-        await setDoc(playerRef,data);
-    } else {
-        const oldData = snapshot.data() || {};
-        data = {...defaults,...oldData};
-
-        const updates = {};
-
-        for (const key of Object.keys(defaults)) {
-            if (oldData[key] === undefined || oldData[key] === null) {
-                updates[key] = defaults[key];
-            }
-        }
-
-        if (Object.keys(updates).length > 0) {
-            await setDoc(playerRef,updates,{merge:true});
-        }
-    }
-
-    resources.gold = validNumber(data.gold,8500);
-    resources.oil = validNumber(data.oil,3400);
-    resources.iron = validNumber(data.iron,2100);
-    resources.wood = validNumber(data.wood,4000);
-
-    stats.power = validNumber(data.power,7400);
-    stats.airforce = validNumber(data.airforce,350);
-    stats.palaceLvl = validNumber(data.palaceLvl,2);
-    stats.airports = validNumber(data.airports,2);
-
-    updateUI();
-    gameLoaded = true;
-
-    $("player-info").innerText =
-        "القائد: " + (user.displayName || user.email);
-
-    return true;
+async function doLogin(){
+ const email=$("email").value.trim();
+ const password=$("password").value;
+ if(!email||!password){message("أدخل البريد وكلمة المرور.");return}
+ const btn=$("loginBtn");
+ btn.disabled=true;message("جارٍ تسجيل الدخول...");
+ try{
+  await signInWithEmailAndPassword(auth,email,password);
+  message("تم تسجيل الدخول.");
+ }catch(e){message(explainError(e))}
+ finally{btn.disabled=false}
 }
 
+$("registerBtn").addEventListener("click",doRegister);
+$("loginBtn").addEventListener("click",doLogin);
 
-/* حفظ بيانات اللاعب */
+onAuthStateChanged(auth,async user=>{
+ currentPlayer=user;
+ gameLoaded=false;
+ if(!user){
+  $("loginBox").classList.remove("hidden");
+  $("playerLabel").textContent="القائد: زائر";
+  status("لم يتم تسجيل الدخول.");
+  return;
+ }
+ $("loginBox").classList.add("hidden");
+ $("playerLabel").textContent="القائد: "+(user.displayName||user.email);
+ try{
+  await loadGameData(user);
+ }catch(e){
+  status(explainError(e));
+  showDialog("مشكلة تحميل البيانات",explainError(e));
+ }
+});
 
-async function saveGameData() {
-    if (!currentPlayer) {
-        throw new Error("لا يوجد حساب مسجل الدخول.");
-    }
+$("logoutBtn").addEventListener("click",async()=>{
+ try{await signOut(auth)}catch(e){showDialog("خطأ",explainError(e))}
+});
 
-    if (!gameLoaded) {
-        throw new Error("بيانات اللعبة لم يتم تحميلها بعد.");
-    }
+$("reloadBtn").addEventListener("click",async()=>{
+ if(!auth.currentUser){showDialog("تنبيه","سجل الدخول أولًا.");return}
+ try{await loadGameData(auth.currentUser)}
+ catch(e){showDialog("خطأ",explainError(e))}
+});
 
-    const playerRef = doc(db,"players",currentPlayer.uid);
-
-    const playerData = {
-        gold:resources.gold,
-        oil:resources.oil,
-        iron:resources.iron,
-        wood:resources.wood,
-        power:stats.power,
-        airforce:stats.airforce,
-        palaceLvl:stats.palaceLvl,
-        airports:stats.airports,
-        updatedAt:serverTimestamp()
-    };
-
-    await setDoc(playerRef,playerData,{merge:true});
-    return true;
+function changeSection(section){
+ for(const id of ["mapSection","citySection","palaceSection","armySection"])
+  $(id).classList.add("hidden");
+ $(section).classList.remove("hidden");
 }
+$("mapBtn").onclick=()=>changeSection("mapSection");
+$("cityBtn").onclick=()=>changeSection("citySection");
+$("palaceBtn").onclick=()=>changeSection("palaceSection");
+$("armyBtn").onclick=()=>changeSection("armySection");
+$("cityPalaceBtn").onclick=()=>changeSection("palaceSection");
 
-
-/* رسائل أخطاء Firebase */
-
-function getFriendlyError(error) {
-    const code = error.code || "";
-
-    const errors = {
-        "auth/invalid-email":"البريد الإلكتروني غير صحيح.",
-        "auth/user-not-found":"لا يوجد حساب بهذا البريد.",
-        "auth/wrong-password":"كلمة المرور غير صحيحة.",
-        "auth/invalid-credential":"بيانات الدخول غير صحيحة.",
-        "auth/email-already-in-use":"هذا البريد مسجل مسبقاً.",
-        "auth/weak-password":"كلمة المرور ضعيفة.",
-        "auth/operation-not-allowed":"فعّل Email/Password في Firebase Authentication.",
-        "auth/network-request-failed":"تحقق من اتصال الإنترنت.",
-        "auth/too-many-requests":"محاولات كثيرة. انتظر قليلاً.",
-        "auth/unauthorized-domain":"أضف نطاق اللعبة إلى Authorized domains.",
-        "permission-denied":"صلاحيات Firestore تمنع الوصول.",
-        "unavailable":"خدمة Firebase غير متاحة الآن. تحقق من الإنترنت."
-    };
-
-    return errors[code] || error.message || "خطأ غير معروف";
+async function performUpgrade(){
+ if(!gameLoaded){showDialog("انتظر","لم يتم تحميل بياناتك بعد.");return}
+ if(game.gold<1000){showDialog("ذهب غير كافٍ","تحتاج إلى 1000 ذهب.");return}
+ const old={...game};
+ game.gold-=1000;game.palaceLevel++;game.power+=500;
+ render();
+ try{await saveGameData();showDialog("نجاح","تم تطوير القصر إلى المستوى "+game.palaceLevel)}
+ catch(e){game=old;render();showDialog("لم يتم الحفظ",explainError(e))}
 }
+$("upgradeBtn").onclick=performUpgrade;
 
+async function train(type,costKey,cost,amount){
+ if(!gameLoaded){showDialog("انتظر","لم يتم تحميل بياناتك بعد.");return}
+ if(game[costKey]<cost){showDialog("موارد غير كافية","لا تملك الموارد الكافية.");return}
+ const old={...game};
+ game[costKey]-=cost;game[type]+=amount;game.power+=amount*5;
+ render();
+ try{await saveGameData();showDialog("تم التدريب","تمت إضافة وحدات جديدة إلى قواتك.")}
+ catch(e){game=old;render();showDialog("تعذر الحفظ",explainError(e))}
+}
+$("trainLand").onclick=()=>train("land","gold",200,20);
+$("trainAir").onclick=()=>train("air","oil",300,10);
+$("trainNavy").onclick=()=>train("navy","iron",250,15);
 
-/* الخريطة */
+$("closeDialog").onclick=hideDialog;
+$("dialog").addEventListener("click",e=>{if(e.target===$("dialog"))hideDialog()});
 
-const map = L.map("map",{
-    zoomControl:false
-}).setView([15.5527,48.5164],6);
-
-L.control.zoom({position:"bottomleft"}).addTo(map);
-
-L.tileLayer(
-    "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    {
-        attribution:"&copy; THE LAST EMPIRE",
-        maxZoom:12,
-        minZoom:5
-    }
-).addTo(map);
-
-const regions = [
-    {
-        name:"العاصمة الملكية المركزية",
-        coords:[15.3694,44.1910],
-        color:"#e74c3c",
-        control:"سيطرة الإمبراطورية"
-    },
-    {
-        name:"محافظة الشمال الاستراتيجية",
-        coords:[16.8550,43.5500],
-        color:"#f39c12",
-        control:"منطقة استراتيجية"
-    },
-    {
-        name:"محافظة الشرق الاقتصادية",
-        coords:[15.9680,48.7900],
-        color:"#2ecc71",
-        control:"إنتاج الموارد"
-    },
-    {
-        name:"محافظة الجنوب الساحلية",
-        coords:[12.7937,45.0351],
-        color:"#3498db",
-        control:"قاعدة ساحلية"
-    }
+/* خريطة بعلامات الدول العربية */
+const countries=[
+ ["المغرب",31.8,-7.1],["الجزائر",28,2.6],["تونس",34,9.5],
+ ["ليبيا",26,17],["مصر",26.8,30.8],["السودان",15.5,30],
+ ["موريتانيا",20.5,-10],["الصومال",5,46],["جيبوتي",11.8,42.6],
+ ["جزر القمر",-11.7,43.3],["السعودية",23.8,45],["اليمن",15.5,48],
+ ["عُمان",20,57],["الإمارات",24.3,54.5],["قطر",25.3,51.2],
+ ["البحرين",26,50.5],["الكويت",29.3,47.5],["العراق",33,44],
+ ["سوريا",35,38.5],["لبنان",33.9,35.8],["الأردن",31,36],
+ ["فلسطين",31.8,35.2]
 ];
-
-regions.forEach(region => {
-    const circle = L.circleMarker(region.coords,{
-        radius:14,
-        color:"#fff",
-        weight:2,
-        fillColor:region.color,
-        fillOpacity:.9
-    }).addTo(map);
-
-    circle.bindPopup(
-        `<b>${region.name}</b><br>
-        <span style="color:#bbb">الحالة:</span>
-        ${region.control}`
-    );
-
-    circle.on("click",() => {
-        $("selected-region").innerHTML =
-            `<b style="color:var(--accent-gold)">${region.name}</b><br>${region.control}`;
-    });
+const map=L.map("map").setView([24,38],3);
+L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{
+ attribution:"© OpenStreetMap © CARTO"
+}).addTo(map);
+countries.forEach(([name,lat,lng])=>{
+ L.marker([lat,lng]).addTo(map)
+ .bindPopup("<b>"+name+"</b><br>دولة عربية")
+ .on("click",()=>{$("countryInfo").textContent="الدولة المختارة: "+name});
 });
-
-
-/* التحقق من الحساب */
-
-function requireLoadedGame() {
-    if (!currentPlayer) {
-        alert("حسابك غير مسجل الدخول. سجّل الدخول مجددًا.");
-        return false;
-    }
-
-    if (!gameLoaded) {
-        alert("تم تسجيل الدخول، لكن بيانات اللعبة لم تُحمّل. اضغط إعادة تحميل البيانات.");
-        return false;
-    }
-
-    return true;
-}
-
-
-/* ترقية القصر */
-
-$("btn-upgrade-palace").addEventListener("click",async () => {
-    if (!requireLoadedGame()) return;
-
-    if (resources.gold < 1000) {
-        alert("تحتاج إلى 1000 مال.");
-        return;
-    }
-
-    const oldGold = resources.gold;
-    const oldLevel = stats.palaceLvl;
-    const oldPower = stats.power;
-
-    resources.gold -= 1000;
-    stats.palaceLvl++;
-    stats.power += 500;
-    updateUI();
-
-    try {
-        await saveGameData();
-        alert("✨ تم تطوير القصر وحفظ البيانات بنجاح!");
-    } catch(error) {
-        resources.gold = oldGold;
-        stats.palaceLvl = oldLevel;
-        stats.power = oldPower;
-        updateUI();
-
-        alert("تعذر حفظ الترقية، تمت إعادة الموارد.\n" + getFriendlyError(error));
-    }
-});
-
-
-/* بناء المطار */
-
-$("btn-build-airport").addEventListener("click",async () => {
-    if (!requireLoadedGame()) return;
-
-    if (resources.oil < 600) {
-        alert("تحتاج إلى 600 نفط.");
-        return;
-    }
-
-    const oldOil = resources.oil;
-    const oldAirports = stats.airports;
-    const oldAirforce = stats.airforce;
-    const oldPower = stats.power;
-
-    resources.oil -= 600;
-    stats.airports++;
-    stats.airforce += 120;
-    stats.power += 350;
-    updateUI();
-
-    try {
-        await saveGameData();
-        alert("✈️ تم بناء المطار وحفظ البيانات بنجاح!");
-    } catch(error) {
-        resources.oil = oldOil;
-        stats.airports = oldAirports;
-        stats.airforce = oldAirforce;
-        stats.power = oldPower;
-        updateUI();
-
-        alert("تعذر حفظ البناء، تمت إعادة الموارد.\n" + getFriendlyError(error));
-    }
-});
-
-
-/* إعادة تحميل البيانات */
-
-$("btn-reload").addEventListener("click",async () => {
-    if (!currentPlayer) {
-        alert("سجّل الدخول أولاً.");
-        return;
-    }
-
-    try {
-        $("player-info").innerText = "جارٍ تحميل بيانات اللاعب...";
-        gameLoaded = false;
-
-        await loadGameData(currentPlayer);
-
-        alert("تم تحميل بيانات اللعبة بنجاح.");
-    } catch(error) {
-        console.error("Reload error:",error);
-        $("player-info").innerText = "تعذر تحميل البيانات.";
-        alert(
-            "فشل تحميل البيانات.\n" +
-            "رمز الخطأ: " + (error.code || error.message) +
-            "\nالتفاصيل: " + getFriendlyError(error)
-        );
-    }
-});
-
-
-/* التحالفات وغرفة القادة */
-
-$("btn-alliance").addEventListener("click",() => {
-    alert("🌐 نظام التحالفات قيد التطوير.");
-});
-
-$("btn-leaders").addEventListener("click",() => {
-    alert("🎖️ غرفة القادة قيد التطوير.");
-});
-
-
-/* إنشاء حساب */
-
-$("btn-register").addEventListener("click",async () => {
-    if (!authReady) {
-        showMessage("انتظر الاتصال بخدمة الحسابات.");
-        return;
-    }
-
-    const name = $("player-name").value.trim();
-    const email = $("player-email").value.trim();
-    const password = $("player-password").value;
-
-    if (!name || !email || password.length < 6) {
-        showMessage("أدخل الاسم والبريد وكلمة مرور من 6 أحرف على الأقل.");
-        return;
-    }
-
-    setAuthButtonsDisabled(true);
-    showMessage("جارٍ إنشاء الحساب...");
-
-    try {
-        const result = await createUserWithEmailAndPassword(auth,email,password);
-
-        await updateProfile(result.user,{displayName:name});
-
-        currentPlayer = auth.currentUser;
-        gameLoaded = false;
-
-        await loadGameData(currentPlayer);
-
-        $("login-box").style.display = "none";
-        showMessage("تم إنشاء الحساب وتحميل البيانات بنجاح.");
-
-    } catch(error) {
-        console.error("Registration error:",error);
-        showMessage("تعذر إنشاء الحساب: " + getFriendlyError(error));
-    } finally {
-        setAuthButtonsDisabled(false);
-    }
-});
-
-
-/* تسجيل الدخول */
-
-$("btn-login").addEventListener("click",async () => {
-    if (!authReady) {
-        showMessage("انتظر الاتصال بخدمة الحسابات.");
-        return;
-    }
-
-    const email = $("player-email").value.trim();
-    const password = $("player-password").value;
-
-    if (!email || !password) {
-        showMessage("أدخل البريد الإلكتروني وكلمة المرور.");
-        return;
-    }
-
-    setAuthButtonsDisabled(true);
-    showMessage("جارٍ تسجيل الدخول...");
-
-    try {
-        await signInWithEmailAndPassword(auth,email,password);
-        showMessage("تم تسجيل الدخول. جارٍ تحميل بيانات اللعبة...");
-    } catch(error) {
-        console.error("Login error:",error);
-        showMessage("تعذر تسجيل الدخول: " + getFriendlyError(error));
-    } finally {
-        setAuthButtonsDisabled(false);
-    }
-});
-
-
-/* تسجيل الخروج */
-
-$("btn-logout").addEventListener("click",async () => {
-    try {
-        await signOut(auth);
-        currentPlayer = null;
-        gameLoaded = false;
-    } catch(error) {
-        alert("تعذر تسجيل الخروج: " + getFriendlyError(error));
-    }
-});
-
-
-/* متابعة حالة تسجيل الدخول */
-
-onAuthStateChanged(auth,async user => {
-    const box = $("login-box");
-
-    currentPlayer = user;
-    gameLoaded = false;
-
-    if (!user) {
-        box.style.display = "flex";
-        $("player-info").innerText = "لم يتم تسجيل الدخول.";
-        authReady = true;
-        return;
-    }
-
-    box.style.display = "none";
-    $("player-info").innerText = "القائد: " + (user.displayName || user.email);
-    authReady = true;
-
-    if (loadingPlayer) return;
-
-    load
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</body>
+</html>
