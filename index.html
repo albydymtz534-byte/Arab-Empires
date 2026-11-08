@@ -6,177 +6,166 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101820;color:#f5e6bd;font-family:Arial,sans-serif}
-header{background:#172633;padding:15px;text-align:center;border-bottom:2px solid #b58b3b}
-h1{margin:0;color:#e9c46a;font-size:24px}
-nav{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;padding:10px;background:#1c2b36}
-button{background:#a77b2e;color:white;border:0;border-radius:8px;padding:11px 15px;cursor:pointer;font-weight:bold}
+body{margin:0;background:#101820;color:#f5e6bd;font-family:Arial,sans-serif;height:100vh;display:flex;flex-direction:column}
+header{background:#172633;padding:10px;text-align:center;border-bottom:2px solid #b58b3b;flex-shrink:0}
+h1{margin:0;color:#e9c46a;font-size:20px}
+nav{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;padding:8px;background:#1c2b36;flex-shrink:0}
+button{background:#a77b2e;color:white;border:0;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:bold;font-size:13px}
 button:hover{background:#c99b45}
 button:disabled{opacity:.5;cursor:not-allowed}
-main{padding:12px;max-width:1100px;margin:auto}
-.panel{background:#1b2b37;border:1px solid #735b32;border-radius:12px;padding:14px;margin-bottom:12px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.stat{background:#263a48;padding:12px;border-radius:8px;text-align:center}
-.stat b{display:block;color:#e9c46a;margin-top:6px}
-#map{height:460px;border-radius:12px;z-index:1;background:#172633}
+
+/* جعل الخريطة تملأ باقي الشاشة بالكامل */
+main{flex-grow:1;display:flex;flex-direction:column;padding:8px;max-width:100%;margin:0;position:relative}
+#mapSection{flex-grow:1;display:flex;flex-direction:column;background:#1b2b37;border:1px solid #735b32;border-radius:10px;padding:10px;margin:0}
+#map{flex-grow:1;width:100%;min-height:350px;border-radius:8px;z-index:1;background:#172633}
+
+.panel{background:#1b2b37;border:1px solid #735b32;border-radius:10px;padding:10px;margin-bottom:8px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:13px}
+.stat{background:#263a48;padding:8px;border-radius:6px;text-align:center}
+.stat b{display:block;color:#e9c46a;margin-top:4px}
 .hidden{display:none!important}
-input{width:100%;padding:12px;margin:6px 0;border-radius:7px;border:1px solid #8c7546;background:#f5f1e7;color:#17212a}
-#loginBox{position:fixed;inset:0;background:#081018ed;z-index:10;display:flex;align-items:center;justify-content:center;padding:15px}
-.loginCard{width:100%;max-width:390px;background:#1b2b37;padding:22px;border-radius:14px;border:1px solid #b58b3b}
-.loginCard h2{text-align:center;color:#e9c46a}
+input{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:1px solid #8c7546;background:#f5f1e7;color:#17212a}
+#loginBox{position:fixed;inset:0;background:#081018ed;z-index:1000;display:flex;align-items:center;justify-content:center;padding:15px}
+.loginCard{width:100%;max-width:390px;background:#1b2b37;padding:20px;border-radius:12px;border:1px solid #b58b3b}
+.loginCard h2{text-align:center;color:#e9c46a;margin-top:0}
 .loginCard button{width:100%;margin-top:8px}
-#message{min-height:24px;color:#ffd27a;font-size:14px;line-height:1.6}
-#dialog{position:fixed;inset:0;background:#000b;z-index:20;display:flex;align-items:center;justify-content:center;padding:15px}
-.dialogCard{background:#203442;border:1px solid #c49a45;padding:20px;border-radius:12px;width:100%;max-width:400px}
-.item{padding:10px;border-bottom:1px solid #46515a}
-.small{font-size:13px;color:#c9c0a7;line-height:1.7}
-#regionInfo{background:#263a48;border-radius:9px;padding:12px;margin-top:12px;line-height:1.8}
-#claimBtn{width:100%;margin-top:10px}
-.legend{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0;font-size:13px}
-.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-left:5px}
+#message{min-height:20px;color:#ffd27a;font-size:13px}
+#dialog{position:fixed;inset:0;background:#000b;z-index:2000;display:flex;align-items:center;justify-content:center;padding:15px}
+.dialogCard{background:#203442;border:1px solid #c49a45;padding:18px;border-radius:10px;width:100%;max-width:380px}
+.item{padding:8px;border-bottom:1px solid #46515a;font-size:14px}
+.small{font-size:12px;color:#c9c0a7;line-height:1.5}
+#regionInfo{background:#263a48;border-radius:6px;padding:8px;margin-top:8px;font-size:13px;line-height:1.6}
+#claimBtn{width:100%;margin-top:6px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin:5px 0;font-size:12px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:4px}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#203442;color:#f5e6bd}
-.leaflet-popup-content{font-family:Arial;line-height:1.8}
-@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}#map{height:390px}}
 </style>
 </head>
 <body>
 <header>
 <h1>THE LAST EMPIRE</h1>
-<div>الإمبراطورية الأخيرة</div>
-</header><div id="loginBox">
+<div style="font-size:12px">الإمبراطورية الأخيرة - خريطة الوطن العربي الكبرى</div>
+</header>
+
+<div id="loginBox">
  <div class="loginCard">
   <h2>دخول الإمبراطورية</h2>
-  <input id="username" placeholder="اسم القائد" maxlength="20">
-  <input id="email" type="email" placeholder="البريد الإلكتروني">
-  <input id="password" type="password" placeholder="كلمة المرور">
-  <button id="registerBtn">إنشاء حساب جديد</button>
-  <button id="loginBtn">تسجيل الدخول</button>
+  <input id="username" placeholder="اسم القائد" maxlength="20" value="القائد">
+  <button id="startBtn">دخول الخريطة</button>
   <p id="message" role="status"></p>
-  <p class="small">لا تشارك كلمة المرور مع أي شخص.</p>
  </div>
-</div><nav>
- <button id="mapBtn">الخريطة</button>
+</div>
+
+<nav>
+ <button id="mapBtn">الخريطة الكبرى</button>
  <button id="cityBtn">مدينتي</button>
  <button id="palaceBtn">القصر</button>
  <button id="armyBtn">القوات</button>
- <button id="logoutBtn">تسجيل الخروج</button>
-</nav><main>
-<section class="panel">
- <div id="playerLabel">القائد: زائر</div>
- <div class="stats">
-  <div class="stat">الذهب<b id="gold">0</b></div>
-  <div class="stat">النفط<b id="oil">0</b></div>
-  <div class="stat">الحديد<b id="iron">0</b></div>
-  <div class="stat">الخشب<b id="wood">0</b></div>
+ <button id="resetBtn" style="background:#a94b43">إعادة ضبط</button>
+</nav>
+
+<main>
+<!-- قسم الخريطة ليملأ الشاشة -->
+<section id="mapSection">
+ <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+  <h3 style="margin:0;font-size:16px">خريطة الوطن العربي</h3>
+  <span style="font-size:12px">المناطق المسيطر عليها: <b id="territoryCount">1</b> | الذهب: <b id="gold">8500</b></span>
  </div>
- <div class="stats" style="margin-top:8px">
-  <div class="stat">القوة<b id="power">0</b></div>
-  <div class="stat">القوات الجوية<b id="air">0</b></div>
-  <div class="stat">القوات البحرية<b id="navy">0</b></div>
-  <div class="stat">القوات البرية<b id="land">0</b></div>
- </div>
- <p>المناطق التي تسيطر عليها: <b id="territoryCount">0</b></p>
-</section><section id="mapSection" class="panel">
- <h3>خريطة الإمبراطورية</h3>
- <p class="small">اضغط على أي منطقة لمعرفة مالكها. يمكنك ضم المناطق المجاورة لمناطقك.</p>
  <div class="legend">
   <span><i class="dot" style="background:#d5a63b"></i>مناطقك</span>
-  <span><i class="dot" style="background:#a94b43"></i>مناطق غير مملوكة لك</span>
+  <span><i class="dot" style="background:#a94b43"></i>مناطق غير مملوكة</span>
  </div>
  <div id="map"></div>
- <div id="regionInfo">اختر منطقة من الخريطة لعرض معلوماتها.</div>
+ <div id="regionInfo">اضغط على أي دولة أو منطقة في الخريطة لعرض تفاصيلها.</div>
  <button id="claimBtn" disabled>ضم المنطقة</button>
- <p class="small">تكلفة ضم المنطقة: 500 ذهب. المناطق تقريبية ومخصصة للعبة وليست حدودًا إدارية رسمية.</p>
-</section><section id="citySection" class="panel hidden">
- <h2>مدينتك الرئيسية</h2>
- <p>🏰 القصر الملكي</p>
- <p>🏘️ الأحياء السكنية</p>
- <p>🌾 المزارع</p>
- <p>🏭 المصانع</p>
- <button id="cityPalaceBtn">فتح القصر</button>
-</section><section id="palaceSection" class="panel hidden">
- <h2>القصر الملكي</h2>
- <p>مستوى القصر: <b id="palaceLevel">1</b></p>
- <p>تكلفة التطوير: 1000 ذهب</p>
- <button id="upgradeBtn">تطوير القصر</button>
-</section><section id="armySection" class="panel hidden">
- <h2>القوات الإمبراطورية</h2>
- <div class="item">القوات البرية: <b id="land2">0</b>
- <button id="trainLand">تدريب (200 ذهب)</button></div>
- <div class="item">القوات الجوية: <b id="air2">0</b>
- <button id="trainAir">تدريب (300 نفط)</button></div>
- <div class="item">القوات البحرية: <b id="navy2">0</b>
- <button id="trainNavy">تدريب (250 حديد)</button></div>
- <p class="small">هذه وحدات خيالية داخل اللعبة.</p>
-</section><section class="panel">
- <h3>حالة الاتصال</h3>
- <p id="status">بانتظار تسجيل الدخول...</p>
- <button id="reloadBtn">إعادة تحميل بياناتي</button>
 </section>
-</main><div id="dialog" class="hidden">
+
+<!-- لوحة الموارد المصغرة -->
+<section class="panel hidden" id="statsPanel">
+ <div class="stats">
+  <div class="stat">الذهب<b id="gold2">8500</b></div>
+  <div class="stat">النفط<b id="oil">3400</b></div>
+  <div class="stat">الحديد<b id="iron">2100</b></div>
+  <div class="stat">الخشب<b id="wood">4000</b></div>
+ </div>
+</section>
+
+<section id="citySection" class="panel hidden">
+ <h2>مدينتك الرئيسية</h2>
+ <p>🏰 القصر الملكي | 🏘️ الأحياء | 🌾 المزارع | 🏭 المصانع</p>
+ <button id="cityPalaceBtn">فتح القصر</button>
+</section>
+
+<section id="palaceSection" class="panel hidden">
+ <h2>القصر الملكي</h2>
+ <p>مستوى القصر: <b id="palaceLevel">1</b> (التكلفة: 1000 ذهب)</p>
+ <button id="upgradeBtn">تطوير القصر</button>
+</section>
+
+<section id="armySection" class="panel hidden">
+ <h2>القوات الإمبراطورية</h2>
+ <div class="item">البرية: <b id="land2">500</b> <button id="trainLand">تدريب (200 ذهب)</button></div>
+ <div class="item">الجوية: <b id="air2">350</b> <button id="trainAir">تدريب (300 نفط)</button></div>
+ <div class="item">البحرية: <b id="navy2">100</b> <button id="trainNavy">تدريب (250 حديد)</button></div>
+</section>
+</main>
+
+<div id="dialog" class="hidden">
  <div class="dialogCard">
-  <h3 id="dialogTitle">معلومات</h3>
+  <h3 id="dialogTitle" style="margin-top:0">معلومات</h3>
   <p id="dialogText"></p>
   <button id="closeDialog">إغلاق</button>
  </div>
-</div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
-import {
- getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,
- onAuthStateChanged,updateProfile,signOut
-} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-import {
- getFirestore,doc,getDoc,setDoc,serverTimestamp
-} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+</div>
 
-const firebaseConfig={
- apiKey:"AIzaSyCa5CpBhOs23W2_ElHFf3Z1OhOm6OFA6Vs",
- authDomain:"arab-empires-d2bef.firebaseapp.com",
- databaseURL:"https://arab-empires-d2bef-default-rtdb.firebaseio.com",
- projectId:"arab-empires-d2bef",
- storageBucket:"arab-empires-d2bef.firebasestorage.app",
- messagingSenderId:"858076630183",
- appId:"1:858076630183:web:7361e6bbfce3f6fa2e5f82",
- measurementId:"G-7NWQNCPS0J"
-};
-
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getFirestore(app);
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
 const $=id=>document.getElementById(id);
 
-let gameLoaded=false;
 let selectedRegion=null;
 let map=null;
 let regionLayers={};
 
 let game={
- gold:8500,oil:3400,iron:2100,wood:4000,
- power:7400,air:350,navy:100,land:500,palaceLevel:1,
+ username:"القائد",
+ gold:8500, oil:3400, iron:2100, wood:4000,
+ power:7400, air:350, navy:100, land:500, palaceLevel:1,
  territories:["sanaa"]
 };
 
-/* المناطق ومواقعها وروابط التوسع داخل اللعبة */
+/* خريطة شاملة لكافة دول الوطن العربي وعواصمها ومناطقها */
 const regions=[
- {id:"sanaa",name:"صنعاء",country:"اليمن",lat:15.35,lng:44.2,neighbors:["taiz","aden","marib"],start:true},
+ /* شبه الجزيرة العربية */
+ {id:"sanaa",name:"صنعاء",country:"اليمن",lat:15.35,lng:44.2,neighbors:["aden","taiz","marib","riyadh"],start:true},
+ {id:"aden",name:"عدن",country:"اليمن",lat:12.8,lng:45.03,neighbors:["sanaa","taiz","muscat"]},
  {id:"taiz",name:"تعز",country:"اليمن",lat:13.58,lng:44.02,neighbors:["sanaa","aden","hodeidah"]},
- {id:"aden",name:"عدن",country:"اليمن",lat:12.8,lng:45.03,neighbors:["sanaa","taiz","dhofar"]},
- {id:"marib",name:"مأرب",country:"اليمن",lat:15.46,lng:45.33,neighbors:["sanaa","najran","riyadh"]},
  {id:"hodeidah",name:"الحديدة",country:"اليمن",lat:14.8,lng:42.95,neighbors:["taiz","jeddah"]},
+ {id:"marib",name:"مأرب",country:"اليمن",lat:15.46,lng:45.33,neighbors:["sanaa","riyadh","najran"]},
+ {id:"riyadh",name:"الرياض",country:"السعودية",lat:24.7,lng:46.7,neighbors:["sanaa","marib","najran","jeddah","kuwait","doha","manama"]},
+ {id:"jeddah",name:"جدة",country:"السعودية",lat:21.5,lng:39.2,neighbors:["hodeidah","riyadh","asir","cairo"]},
  {id:"najran",name:"نجران",country:"السعودية",lat:17.49,lng:44.13,neighbors:["marib","riyadh","asir"]},
- {id:"asir",name:"عسير",country:"السعودية",lat:18.2,lng:42.5,neighbors:["najran","jeddah","riyadh"]},
- {id:"jeddah",name:"جدة",country:"السعودية",lat:21.5,lng:39.2,neighbors:["hodeidah","asir","riyadh"]},
- {id:"riyadh",name:"الرياض",country:"السعودية",lat:24.7,lng:46.7,neighbors:["marib","najran","asir","jeddah","kuwait","doha"]},
- {id:"kuwait",name:"الكويت",country:"الكويت",lat:29.37,lng:47.98,neighbors:["riyadh","basra"]},
- {id:"basra",name:"البصرة",country:"العراق",lat:30.5,lng:47.8,neighbors:["kuwait","baghdad"]},
- {id:"baghdad",name:"بغداد",country:"العراق",lat:33.3,lng:44.4,neighbors:["basra","mosul","damascus"]},
+ {id:"asir",name:"عسير",country:"السعودية",lat:18.2,lng:42.5,neighbors:["jeddah","najran","riyadh"]},
+ {id:"kuwait",name:"الكويت",country:"الكويت",lat:29.37,lng:47.98,neighbors:["riyadh","basra","doha"]},
+ {id:"doha",name:"الدوحة",country:"قطر",lat:25.27,lng:51.53,neighbors:["riyadh","kuwait","manama","abudhabi"]},
+ {id:"manama",name:"المنامة",country:"البحرين",lat:26.22,lng:50.58,neighbors:["riyadh","doha"]},
+ {id:"abudhabi",name:"أبوظبي",country:"الإمارات",lat:24.45,lng:54.37,neighbors:["doha","muscat"]},
+ {id:"muscat",name:"مسقط",country:"سلطنة عمان",lat:23.6,lng:58.54,neighbors:["abudhabi","aden"]},
+
+ /* بلاد الشام والعراق */
+ {id:"baghdad",name:"بغداد",country:"العراق",lat:33.3,lng:44.4,neighbors:["basra","mosul","damascus","kuwait"]},
+ {id:"basra",name:"البصرة",country:"العراق",lat:30.5,lng:47.8,neighbors:["baghdad","kuwait"]},
  {id:"mosul",name:"الموصل",country:"العراق",lat:36.34,lng:43.12,neighbors:["baghdad","damascus"]},
  {id:"damascus",name:"دمشق",country:"سوريا",lat:33.5,lng:36.3,neighbors:["baghdad","mosul","amman","beirut"]},
  {id:"beirut",name:"بيروت",country:"لبنان",lat:33.9,lng:35.5,neighbors:["damascus","amman"]},
- {id:"amman",name:"عمّان",country:"الأردن",lat:31.95,lng:35.93,neighbors:["damascus","beirut","cairo"]},
- {id:"cairo",name:"القاهرة",country:"مصر",lat:30.04,lng:31.23,neighbors:["amman","alexandria","khartoum"]},
+ {id:"amman",name:"عمّان",country:"الأردن",lat:31.95,lng:35.93,neighbors:["damascus","beirut","cairo","riyadh"]},
+
+ /* مصر والسودان */
+ {id:"cairo",name:"القاهرة",country:"مصر",lat:30.04,lng:31.23,neighbors:["amman","alexandria","khartoum","jeddah"]},
  {id:"alexandria",name:"الإسكندرية",country:"مصر",lat:31.2,lng:29.9,neighbors:["cairo","tripoli"]},
  {id:"khartoum",name:"الخرطوم",country:"السودان",lat:15.5,lng:32.5,neighbors:["cairo","mogadishu"]},
+ {id:"mogadishu",name:"مقديشو",country:"الصومال",lat:2.04,lng:45.34,neighbors:["khartoum"]},
+
+ /* شمال إفريقيا */
  {id:"tripoli",name:"طرابلس",country:"ليبيا",lat:32.9,lng:13.2,neighbors:["alexandria","tunis"]},
  {id:"tunis",name:"تونس",country:"تونس",lat:36.8,lng:10.18,neighbors:["tripoli","algiers"]},
  {id:"algiers",name:"الجزائر",country:"الجزائر",lat:36.75,lng:3.05,neighbors:["tunis","rabat"]},
@@ -184,8 +173,6 @@ const regions=[
  {id:"nouakchott",name:"نواكشوط",country:"موريتانيا",lat:18.08,lng:-15.97,neighbors:["rabat"]}
 ];
 
-function message(t){$("message").textContent=t}
-function status(t){$("status").textContent=t}
 function showDialog(title,text){
  $("dialogTitle").textContent=title;
  $("dialogText").textContent=text;
@@ -193,63 +180,34 @@ function showDialog(title,text){
 }
 function hideDialog(){$("dialog").classList.add("hidden")}
 
-function explainError(e){
- const code=e?.code||"";
- const errors={
- "auth/email-already-in-use":"هذا البريد مسجل بالفعل.",
- "auth/invalid-email":"البريد الإلكتروني غير صحيح.",
- "auth/weak-password":"كلمة المرور يجب أن تكون 6 أحرف على الأقل.",
- "auth/invalid-credential":"البريد أو كلمة المرور غير صحيحة.",
- "auth/too-many-requests":"محاولات كثيرة. انتظر قليلًا.",
- "auth/unauthorized-domain":"أضف نطاق GitHub Pages إلى Authorized domains في Firebase.",
- "permission-denied":"رفضت قواعد Firestore العملية. تحقق من القواعد المنشورة.",
- "unavailable":"تعذر الاتصال. تحقق من الإنترنت."
- };
- return errors[code]||("تعذر إكمال العملية: "+(e?.message||code||"خطأ غير معروف"));
+function saveGame(){
+ localStorage.setItem("the_last_empire_save", JSON.stringify(game));
+}
+function loadGame(){
+ const saved=localStorage.getItem("the_last_empire_save");
+ if(saved){try{game={...game,...JSON.parse(saved)};}catch(e){}}
 }
 
 function render(){
  for(const key of ["gold","oil","iron","wood","power","air","navy","land","palaceLevel"])
-  $(key).textContent=game[key]??0;
- $("air2").textContent=game.air;
- $("navy2").textContent=game.navy;
- $("land2").textContent=game.land;
- $("territoryCount").textContent=game.territories.length;
+  if($(key)) $(key).textContent=game[key]??0;
+ if($("gold2")) $("gold2").textContent=game.gold;
+ if($("air2")) $("air2").textContent=game.air;
+ if($("navy2")) $("navy2").textContent=game.navy;
+ if($("land2")) $("land2").textContent=game.land;
+ if($("territoryCount")) $("territoryCount").textContent=game.territories.length;
  updateRegionStyles();
-}
-
-async function loadGameData(user){
- gameLoaded=false;
- status("جارٍ تحميل بيانات القائد...");
- const ref=doc(db,"players",user.uid);
- const snap=await getDoc(ref);
- if(snap.exists()){
-  const data=snap.data();
-  for(const key of ["gold","oil","iron","wood","power","air","navy","land","palaceLevel"])
-   if(typeof data[key]==="number")game[key]=data[key];
-  if(Array.isArray(data.territories))game.territories=data.territories;
-  else game.territories=["sanaa"];
- }else{
-  game.territories=["sanaa"];
-  await setDoc(ref,{username:user.displayName||"قائد جديد",...game,createdAt:serverTimestamp()});
- }
- await setDoc(ref,{username:user.displayName||"قائد جديد",lastSeen:serverTimestamp()},{merge:true});
- gameLoaded=true;
- render();
- status("تم تحميل بياناتك وحفظها بنجاح.");
-}
-
-async function saveGameData(){
- if(!auth.currentUser||!gameLoaded)throw new Error("انتظر تحميل بيانات اللاعب.");
- await setDoc(doc(db,"players",auth.currentUser.uid),{...game,updatedAt:serverTimestamp()},{merge:true});
 }
 
 function changeSection(section){
  for(const id of ["mapSection","citySection","palaceSection","armySection"])
   $(id).classList.add("hidden");
  $(section).classList.remove("hidden");
- if(section==="mapSection"&&map)setTimeout(()=>map.invalidateSize(),100);
+ if(section==="mapSection"&&map){
+  setTimeout(()=>map.invalidateSize(),150);
+ }
 }
+
 $("mapBtn").onclick=()=>changeSection("mapSection");
 $("cityBtn").onclick=()=>changeSection("citySection");
 $("palaceBtn").onclick=()=>changeSection("palaceSection");
@@ -264,12 +222,13 @@ function updateRegionStyles(){
   layer.setStyle({
    color:owned?"#f0c45b":"#b65c50",
    fillColor:owned?"#d5a63b":"#a94b43",
-   fillOpacity:owned?.85:.55,
-   radius:owned?12:10,
+   fillOpacity:owned?.9:.6,
+   radius:owned?11:9,
    weight:2
   });
  }
- $("territoryCount").textContent=game.territories.length;
+ if($("territoryCount")) $("territoryCount").textContent=game.territories.length;
+ if($("gold")) $("gold").textContent=game.gold;
 }
 
 function selectRegion(region){
@@ -279,144 +238,100 @@ function selectRegion(region){
   game.territories.includes(r.id)&&r.neighbors.includes(region.id)
  );
  $("regionInfo").innerHTML=
-  "<b>"+region.name+" - "+region.country+"</b><br>"+
-  "المالك: "+(owned?"إمبراطوريتك":"لا يوجد مالك في هذه النسخة")+
-  "<br>الحالة: "+(owned?"تحت سيطرتك":adjacent?"يمكنك ضمها":"بعيدة عن مناطقك الحالية")+
+  "<b>"+region.name+" ("+region.country+")</b><br>"+
+  "المالك: "+(owned?"إمبراطوريتك":"منطقة محايدة/معادية")+
+  "<br>الحالة: "+(owned?"تحت سيطرتك الكاملة":adjacent?"مجاورة لمناطقك (جاهزة للضم)":"بعيدة جداً عن حدودك")+
   "<br>تكلفة الضم: 500 ذهب";
- $("claimBtn").disabled=owned||!adjacent||!gameLoaded;
- $("claimBtn").textContent=owned?"هذه المنطقة ملكك":adjacent?"ضم "+region.name+" - 500 ذهب":"يجب السيطرة على منطقة مجاورة أولًا";
+ $("claimBtn").disabled=owned||!adjacent;
+ $("claimBtn").textContent=owned?"هذه المنطقة ملكك":adjacent?"ضم "+region.name+" - 500 ذهب":"يجب ضم المناطق المجاورة أولًا";
 }
 
 function initMap(){
- map=L.map("map").setView([24,38],4);
+ // تمركز الخريطة لتشمل الوطن العربي بوضوح
+ map=L.map("map",{zoomControl:true}).setView([24,40],4);
  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{
-  attribution:"© OpenStreetMap © CARTO"
+  attribution:"© OpenStreetMap"
  }).addTo(map);
+
  regions.forEach(region=>{
   const layer=L.circleMarker([region.lat,region.lng],{
-   radius:10,color:"#b65c50",fillColor:"#a94b43",fillOpacity:.55,weight:2
+   radius:9,color:"#b65c50",fillColor:"#a94b43",fillOpacity:.6,weight:2
   }).addTo(map);
-  layer.bindTooltip(region.name,{direction:"top"});
+  layer.bindTooltip(region.name+" ("+region.country+")",{direction:"top"});
   layer.on("click",()=>selectRegion(region));
   regionLayers[region.id]=layer;
  });
  updateRegionStyles();
 }
 
-async function claimRegion(){
- if(!selectedRegion||!gameLoaded)return;
+function claimRegion(){
+ if(!selectedRegion)return;
  const region=selectedRegion;
  if(game.territories.includes(region.id))return;
  const adjacent=regions.some(r=>game.territories.includes(r.id)&&r.neighbors.includes(region.id));
- if(!adjacent){showDialog("لا يمكن الضم","يجب أن تكون المنطقة مجاورة لمنطقة تسيطر عليها.");return}
- if(game.gold<500){showDialog("ذهب غير كافٍ","تحتاج إلى 500 ذهب لضم المنطقة.");return}
- const old={...game,territories:[...game.territories]};
+ if(!adjacent){showDialog("خطأ","يجب أن تكون المنطقة مجاورة لمنطقة تسيطر عليها.");return}
+ if(game.gold<500){showDialog("ذهب غير كافٍ","تحتاج إلى 500 ذهب لضم هذه المنطقة.");return}
+ 
  game.gold-=500;
  game.territories.push(region.id);
  game.power+=150;
  game.wood+=100;
  game.iron+=50;
+ saveGame();
  render();
- try{
-  await saveGameData();
-  selectRegion(region);
-  showDialog("تم ضم المنطقة","أصبحت "+region.name+" جزءًا من إمبراطوريتك! حصلت على موارد إضافية.");
- }catch(e){
-  game=old;
-  render();
-  selectRegion(region);
-  showDialog("تعذر الحفظ",explainError(e));
- }
+ selectRegion(region);
+ showDialog("تم الضم بنجاح!", "أصبحت "+region.name+" جزءًا من إمبراطوريتك.");
 }
 $("claimBtn").onclick=claimRegion;
 
-async function performUpgrade(){
- if(!gameLoaded)return;
- if(game.gold<1000){showDialog("ذهب غير كافٍ","تحتاج إلى 1000 ذهب.");return}
- const old={...game,territories:[...game.territories]};
- game.gold-=1000;game.palaceLevel++;game.power+=500;
+function performUpgrade(){
+ if(game.gold<1000){showDialog("ذهب غير كافٍ","تحتاج إلى 1000 ذهب للتطوير.");return}
+ game.gold-=1000;
+ game.palaceLevel++;
+ game.power+=500;
+ saveGame();
  render();
- try{await saveGameData();showDialog("نجاح","تم تطوير القصر إلى المستوى "+game.palaceLevel)}
- catch(e){game=old;render();showDialog("لم يتم الحفظ",explainError(e))}
+ showDialog("نجاح", "تم ترقية القصر إلى المستوى "+game.palaceLevel);
 }
 $("upgradeBtn").onclick=performUpgrade;
 
-async function train(type,costKey,cost,amount){
- if(!gameLoaded)return;
- if(game[costKey]<cost){showDialog("موارد غير كافية","لا تملك الموارد الكافية.");return}
- const old={...game,territories:[...game.territories]};
- game[costKey]-=cost;game[type]+=amount;game.power+=amount*5;
+function train(type,costKey,cost,amount){
+ if(game[costKey]<cost){showDialog("موارد غير كافية","لا تملك ما يكفي من الموارد.");return}
+ game[costKey]-=cost;
+ game[type]+=amount;
+ game.power+=amount*5;
+ saveGame();
  render();
- try{await saveGameData();showDialog("تم التدريب","تمت إضافة وحدات جديدة إلى قواتك.")}
- catch(e){game=old;render();showDialog("تعذر الحفظ",explainError(e))}
+ showDialog("تم التدريب","تم تعزيز قواتك العسكرية بنجاح.");
 }
 $("trainLand").onclick=()=>train("land","gold",200,20);
 $("trainAir").onclick=()=>train("air","oil",300,10);
 $("trainNavy").onclick=()=>train("navy","iron",250,15);
 
-async function doRegister(){
+$("startBtn").onclick=()=>{
  const name=$("username").value.trim();
- const email=$("email").value.trim();
- const password=$("password").value;
- if(name.length<2){message("اكتب اسم قائد من حرفين على الأقل.");return}
- if(!email||!email.includes("@")){message("اكتب بريدًا صحيحًا.");return}
- if(password.length<6){message("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");return}
- $("registerBtn").disabled=true;message("جارٍ إنشاء الحساب...");
- try{
-  const result=await createUserWithEmailAndPassword(auth,email,password);
-  await updateProfile(result.user,{displayName:name});
-  game.territories=["sanaa"];
-  await setDoc(doc(db,"players",result.user.uid),{username:name,...game,createdAt:serverTimestamp()},{merge:true});
-  message("تم إنشاء الحساب بنجاح.");
- }catch(e){message(explainError(e))}
- finally{$("registerBtn").disabled=false}
-}
-
-async function doLogin(){
- const email=$("email").value.trim();
- const password=$("password").value;
- if(!email||!password){message("أدخل البريد وكلمة المرور.");return}
- $("loginBtn").disabled=true;message("جارٍ تسجيل الدخول...");
- try{await signInWithEmailAndPassword(auth,email,password);message("تم تسجيل الدخول.")}
- catch(e){message(explainError(e))}
- finally{$("loginBtn").disabled=false}
-}
-
-$("registerBtn").onclick=doRegister;
-$("loginBtn").onclick=doLogin;
-
-onAuthStateChanged(auth,async user=>{
- gameLoaded=false;
- if(!user){
-  $("loginBox").classList.remove("hidden");
-  $("playerLabel").textContent="القائد: زائر";
-  status("لم يتم تسجيل الدخول.");
-  $("claimBtn").disabled=true;
-  return;
- }
+ if(name.length>=2)game.username=name;
+ saveGame();
  $("loginBox").classList.add("hidden");
- $("playerLabel").textContent="القائد: "+(user.displayName||user.email);
- try{
-  await loadGameData(user);
-  if(map)updateRegionStyles();
- }catch(e){
-  status(explainError(e));
-  showDialog("مشكلة تحميل البيانات",explainError(e));
+ render();
+ setTimeout(()=>map.invalidateSize(),200);
+};
+
+$("resetBtn").onclick=()=>{
+ if(confirm("إعادة ضبط اللعبة ومسح التقدم؟")){
+  localStorage.removeItem("the_last_empire_save");
+  location.reload();
  }
-});
-
-$("logoutBtn").onclick=async()=>{
- try{await signOut(auth)}catch(e){showDialog("خطأ",explainError(e))}
 };
-$("reloadBtn").onclick=async()=>{
- if(!auth.currentUser){showDialog("تنبيه","سجل الدخول أولًا.");return}
- try{await loadGameData(auth.currentUser)}
- catch(e){showDialog("خطأ",explainError(e))}
-};
-$("closeDialog").onclick=()=> $("dialog").classList.add("hidden");
-$("dialog").onclick=e=>{if(e.target===$("dialog"))hideDialog()};
 
+$("closeDialog").onclick=()=>hideDialog();
+$("dialog").onclick=e=>{if(e.target===$("dialog"))hideDialog();};
+
+loadGame();
 initMap();
 render();
+if(game.username && game.username!=="القائد"){
+ $("loginBox").classList.add("hidden");
+}
 </script></body>
 </html>
