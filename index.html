@@ -1,458 +1,475 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE LAST EMPIRE - الإمبراطورية الأخيرة</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        :root {
-            --bg-main: #0a0a0c;
-            --bg-panel: #141419;
-            --border-color: #2a2a35;
-            --accent-gold: #f39c12;
-            --accent-red: #e74c3c;
-            --accent-blue: #3498db;
-            --text-main: #ecf0f1;
-            --text-muted: #95a5a6;
-        }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        /* الشريط العلوي الفخم */
-        #top-bar {
-            background: linear-gradient(to bottom, #1a1a24, #101017);
-            border-bottom: 2px solid var(--accent-gold);
-            padding: 12px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-        }
-        .resources-group, .stats-group {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        .resource-item, .stat-item {
-            background: rgba(20, 20, 25, 0.8);
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
-        }
-        .resource-item span {
-            color: var(--accent-gold);
-        }
-        .action-btn {
-            background: linear-gradient(135deg, #c0392b, #e74c3c);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
-        }
-        .action-btn:hover {
-            background: linear-gradient(135deg, #d9534f, #c0392b);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.5);
-        }
-        /* التخطيط الرئيسي */
-        #main-container {
-            display: flex;
-            flex: 1;
-            position: relative;
-        }
-        /* اللوحة الجانبية الفخمة */
-        #sidebar {
-            width: 350px;
-            background: var(--bg-panel);
-            border-left: 2px solid var(--border-color);
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            box-shadow: -5px 0 25px rgba(0,0,0,0.5);
-        }
-        .panel-section {
-            background: #1a1a22;
-            padding: 16px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            transition: transform 0.2s;
-        }
-        .panel-section:hover {
-            border-color: #3a3a4a;
-        }
-        .panel-section h3 {
-            margin-bottom: 12px;
-            font-size: 16px;
-            color: var(--accent-gold);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .upgrade-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 12px;
-            background: #121217;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid #22222d;
-        }
-        .upgrade-card span {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-        .small-btn {
-            background: linear-gradient(135deg, #d35400, #e67e22);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        .small-btn:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
-        }
-        /* الخريطة */
-        #map {
-            flex: 1;
-            height: 100%;
-            background: #050507;
-        }
-        /* تخصيص نصوص المنبثقة للخريطة */
-        .leaflet-popup-content-wrapper {
-            background: #1a1a24;
-            color: #fff;
-            border: 1px solid var(--accent-gold);
-            border-radius: 8px;
-        }
-        .leaflet-popup-tip {
-            background: #1a1a24;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- الشريط العلوي الفخم -->
-    <div id="top-bar">
-        <div class="resources-group">
-            <div class="resource-item">💰 المال: <span id="res-gold">8500</span></div>
-            <div class="resource-item">🛢️ النفط: <span id="res-oil">3400</span></div>
-            <div class="resource-item">⚙️ الحديد: <span id="res-iron">2100</span></div>
-            <div class="resource-item">🪵 الخشب: <span id="res-wood">4000</span></div>
-        </div>
-        <div class="stats-group">
-            <div class="stat-item">🎖️ القوة: <span id="stat-power">7400</span></div>
-            <div class="stat-item">✈️ الجوية: <span id="stat-airforce">350</span></div>
-            <button class="action-btn" onclick="openAlliance()">التحالفات</button>
-            <button class="action-btn" onclick="openLeaders()">غرفة القادة</button>
-        </div>
-    </div>
-
-    <!-- المحتوى الرئيسي -->
-    <div id="main-container">
-        <div id="map"></div>
-        
-        <div id="sidebar">
-            <div class="panel-section">
-                <h3>🏛️ العاصمة الإمبراطورية</h3>
-                <p style="font-size: 14px; margin-bottom: 8px;">مستوى القصر الملكي: <b id="palace-level" style="color: var(--accent-gold);">2</b></p>
-                <div class="upgrade-card">
-                    <span>ترقية القصر (+500 قوة)</span>
-                    <button class="small-btn" onclick="upgradePalace()">ترقية (1000 مال)</button>
-                </div>
-            </div>
-
-            <div class="panel-section">
-                <h3>✈️ قيادة القوات الجوية</h3>
-                <p style="font-size: 14px; margin-bottom: 8px;">المطارات النشطة: <b id="airport-count" style="color: var(--accent-blue);">2</b></p>
-                <div class="upgrade-card">
-                    <span>إنشاء مطار حربي</span>
-                    <button class="small-btn" onclick="buildAirport()">بناء (600 نفط)</button>
-                </div>
-            </div>
-
-            <div class="panel-section">
-                <h3>📍 رادار العمليات الميدانية</h3>
-                <p id="selected-region" style="font-size: 13px; color: var(--text-muted);">اختر محافظة من الخريطة لعرض التقارير الاستخباراتية وتحليل السيطرة...</p>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        let resources = { gold: 8500, oil: 3400, iron: 2100, wood: 4000 };
-        let stats = { power: 7400, airforce: 350, palaceLvl: 2, airports: 2 };
-
-        function updateUI() {
-            document.getElementById('res-gold').innerText = resources.gold;
-            document.getElementById('res-oil').innerText = resources.oil;
-            document.getElementById('res-iron').innerText = resources.iron;
-            document.getElementById('res-wood').innerText = resources.wood;
-            document.getElementById('stat-power').innerText = stats.power;
-            document.getElementById('stat-airforce').innerText = stats.airforce;
-            document.getElementById('palace-level').innerText = stats.palaceLvl;
-            document.getElementById('airport-count').innerText = stats.airports;
-        }
-
-        // خريطة داكنة وفخمة
-        const map = L.map('map', { zoomControl: false }).setView([15.5527, 48.5164], 6);
-        L.control.zoom({ position: 'bottomleft' }).addTo(map);
-
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; THE LAST EMPIRE - Ultimate Edition',
-            maxZoom: 12,
-            minZoom: 5
-        }).addTo(map);
-
-        const regions = [
-            { name: "العاصمة الملكية المركزية", coords: [15.3694, 44.1910], color: "#e74c3c", control: "سيطرة مطلقة للإمبراطورية" },
-            { name: "محافظة الشمال الاستراتيجية", coords: [16.8550, 43.5500], color: "#f39c12", control: "منطقة نزاع ومواجهات" },
-            { name: "محافظة الشرق الاقتصادية", coords: [15.9680, 48.7900], color: "#2ecc71", control: "مؤمنة بالكامل - إنتاج موارد" },
-            { name: "محافظة الجنوب الساحلية", coords: [12.7937, 45.0351], color: "#3498db", control: "قاعدة بحرية وجوية رئيسية" }
-        ];
-
-        regions.forEach(reg => {
-            const circle = L.circleMarker(reg.coords, {
-                radius: 14,
-                color: '#fff',
-                weight: 2,
-                fillColor: reg.color,
-                fillOpacity: 0.9
-            }).addTo(map);
-
-            circle.bindPopup(`<b>${reg.name}</b><br><span style="color: #bbb;">الحالة:</span> ${reg.control}`);
-            
-            circle.on('click', () => {
-                document.getElementById('selected-region').innerHTML = `<b style="color:var(--accent-gold);">${reg.name}</b><br><span style="color:var(--text-muted);">الحالة العسكرية:</span> ${reg.control}`;
-            });
-        });
-
-        function upgradePalace() {
-            if (resources.gold >= 1000) {
-                resources.gold -= 1000;
-                stats.palaceLvl++;
-                stats.power += 500;
-                updateUI();
-                saveGameData();
-                alert("✨ تم ترقية القصر الملكي بنجاح! ارتفعت هيبة الإمبراطورية.");
-            } else {
-                alert("⚠️ المنجم يفتقر للمال الكافي (تحتاج 1000 مال)!");
-            }
-        }
-
-        function buildAirport() {
-            if (resources.oil >= 600) {
-                resources.oil -= 600;
-                stats.airports++;
-                stats.airforce += 120;
-                stats.power += 350;
-                updateUI();
-                saveGameData();
-                alert("✈️ تم تدشين مطار حربي جديد وانضمام سرب طائرات حديث!");
-            } else {
-                alert("⚠️ مخزون النفط غير كافٍ لتشغيل المطار (تحتاج 600 نفط)!");
-            }
-        }
-
-        function openAlliance() {
-            alert("🌐 شاشات التحالفات: مفاوضات مع الحلفاء وعقد معاهدات الهيمنة الكبرى.");
-        }
-
-        function openLeaders() {
-            alert("🎖️ قاعة القادة العسكريين: استدعاء كبار الضباط لتوجيه الأسراب الجوية والجيوش.");
-        }
-
-        updateUI();
-    </script>
-</body>
-<div id="login-box" style="position:fixed;inset:0;background:#0a0a0c;z-index:9999;display:flex;align-items:center;justify-content:center;">
-  <div style="background:#1a1a22;padding:25px;border:1px solid #f39c12;border-radius:15px;width:90%;max-width:350px;text-align:center;">
-    <h2 style="color:#f39c12;margin-bottom:20px;">👑 العهد الأخير</h2>
-    <input id="player-name" placeholder="اسم اللاعب" style="width:100%;padding:12px;margin:7px 0;">
-    <input id="player-email" type="email" placeholder="البريد الإلكتروني" style="width:100%;padding:12px;margin:7px 0;direction:ltr;">
-    <input id="player-password" type="password" placeholder="كلمة المرور" style="width:100%;padding:12px;margin:7px 0;">
-    <button onclick="registerPlayer()" class="action-btn">إنشاء حساب</button>
-    <button onclick="loginPlayer()" class="action-btn">تسجيل الدخول</button>
-    <p id="login-message" style="margin-top:12px;color:#f39c12;"></p>
-  </div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE LAST EMPIRE - الإمبراطورية الأخيرة</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>
+:root {
+    --bg-main:#0a0a0c;
+    --bg-panel:#141419;
+    --border-color:#2a2a35;
+    --accent-gold:#f39c12;
+    --accent-red:#e74c3c;
+    --accent-blue:#3498db;
+    --text-main:#ecf0f1;
+    --text-muted:#95a5a6;
+}
+* {
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+}
+body {
+    background:var(--bg-main);
+    color:var(--text-main);
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+#top-bar {
+    background:linear-gradient(to bottom,#1a1a24,#101017);
+    border-bottom:2px solid var(--accent-gold);
+    padding:12px 25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+    z-index:1000;
+}
+.resources-group,.stats-group {
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+.resource-item,.stat-item {
+    background:rgba(20,20,25,.8);
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:600;
+    border:1px solid var(--border-color);
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+.resource-item span,.stat-item span {
+    color:var(--accent-gold);
+}
+.action-btn {
+    background:linear-gradient(135deg,#c0392b,#e74c3c);
+    color:white;
+    border:none;
+    padding:8px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+#main-container {
+    display:flex;
+    flex:1;
+    position:relative;
+    min-height:0;
+}
+#sidebar {
+    width:350px;
+    background:var(--bg-panel);
+    border-left:2px solid var(--border-color);
+    padding:20px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+.panel-section {
+    background:#1a1a22;
+    padding:16px;
+    border-radius:10px;
+    border:1px solid var(--border-color);
+}
+.panel-section h3 {
+    margin-bottom:12px;
+    font-size:16px;
+    color:var(--accent-gold);
+    border-bottom:1px solid var(--border-color);
+    padding-bottom:8px;
+}
+.upgrade-card {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:12px;
+    background:#121217;
+    padding:10px 12px;
+    border-radius:8px;
+}
+.upgrade-card span {
+    font-size:13px;
+    color:var(--text-muted);
+}
+.small-btn {
+    background:linear-gradient(135deg,#d35400,#e67e22);
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:bold;
+}
+#map {
+    flex:1;
+    height:100%;
+    background:#050507;
+}
+.leaflet-popup-content-wrapper {
+    background:#1a1a24;
+    color:#fff;
+    border:1px solid var(--accent-gold);
+    border-radius:8px;
+}
+.leaflet-popup-tip {
+    background:#1a1a24;
+}
+#login-box {
+    position:fixed;
+    inset:0;
+    background:#0a0a0c;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.login-card {
+    background:#1a1a22;
+    padding:25px;
+    border:1px solid #f39c12;
+    border-radius:15px;
+    width:90%;
+    max-width:350px;
+    text-align:center;
+}
+.login-card input {
+    width:100%;
+    padding:12px;
+    margin:7px 0;
+}
+#login-message {
+    margin-top:12px;
+    color:#f39c12;
+}
+@media(max-width:750px) {
+    #top-bar {padding:10px;}
+    .resources-group,.stats-group {gap:6px;}
+    .resource-item,.stat-item {font-size:12px;padding:6px;}
+    #sidebar {width:180px;padding:10px;}
+    .panel-section {padding:10px;}
+    .panel-section h3 {font-size:13px;}
+}
+</style></head><body><div id="top-bar">
+    <div class="resources-group">
+        <div class="resource-item">💰 المال: <span id="res-gold">8500</span></div>
+        <div class="resource-item">🛢️ النفط: <span id="res-oil">3400</span></div>
+        <div class="resource-item">⚙️ الحديد: <span id="res-iron">2100</span></div>
+        <div class="resource-item">🪵 الخشب: <span id="res-wood">4000</span></div>
+    </div><div class="stats-group">
+    <div class="stat-item">🎖️ القوة: <span id="stat-power">7400</span></div>
+    <div class="stat-item">✈️ الجوية: <span id="stat-airforce">350</span></div>
+    <button class="action-btn" onclick="openAlliance()">التحالفات</button>
+    <button class="action-btn" onclick="openLeaders()">غرفة القادة</button>
 </div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+
+</div><div id="main-container">
+    <div id="map"></div><div id="sidebar">
+    <div class="panel-section">
+        <h3>🏛️ العاصمة الإمبراطورية</h3>
+        <p style="font-size:14px;margin-bottom:8px">
+            مستوى القصر الملكي:
+            <b id="palace-level" style="color:var(--accent-gold)">2</b>
+        </p>
+        <div class="upgrade-card">
+            <span>ترقية القصر (+500 قوة)</span>
+            <button class="small-btn" onclick="upgradePalace()">ترقية (1000 مال)</button>
+        </div>
+    </div>
+
+    <div class="panel-section">
+        <h3>✈️ قيادة القوات الجوية</h3>
+        <p style="font-size:14px;margin-bottom:8px">
+            المطارات النشطة:
+            <b id="airport-count" style="color:var(--accent-blue)">2</b>
+        </p>
+        <div class="upgrade-card">
+            <span>إنشاء مطار حربي</span>
+            <button class="small-btn" onclick="buildAirport()">بناء (600 نفط)</button>
+        </div>
+    </div>
+
+    <div class="panel-section">
+        <h3>📍 رادار العمليات الميدانية</h3>
+        <p id="selected-region" style="font-size:13px;color:var(--text-muted)">
+            اختر محافظة من الخريطة لعرض التقارير...
+        </p>
+    </div>
+</div>
+
+</div><div id="login-box">
+    <div class="login-card">
+        <h2 style="color:#f39c12;margin-bottom:20px">👑 العهد الأخير</h2>
+        <input id="player-name" placeholder="اسم اللاعب">
+        <input id="player-email" type="email" placeholder="البريد الإلكتروني" style="direction:ltr">
+        <input id="player-password" type="password" placeholder="كلمة المرور">
+        <button onclick="registerPlayer()" class="action-btn">إنشاء حساب</button>
+        <button onclick="loginPlayer()" class="action-btn">تسجيل الدخول</button>
+        <p id="login-message"></p>
+    </div>
+</div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
+let resources = {gold:8500,oil:3400,iron:2100,wood:4000};
+let stats = {power:7400,airforce:350,palaceLvl:2,airports:2};
+
+function updateUI() {
+    document.getElementById('res-gold').innerText=resources.gold;
+    document.getElementById('res-oil').innerText=resources.oil;
+    document.getElementById('res-iron').innerText=resources.iron;
+    document.getElementById('res-wood').innerText=resources.wood;
+    document.getElementById('stat-power').innerText=stats.power;
+    document.getElementById('stat-airforce').innerText=stats.airforce;
+    document.getElementById('palace-level').innerText=stats.palaceLvl;
+    document.getElementById('airport-count').innerText=stats.airports;
+}
+
+const map = L.map('map',{zoomControl:false}).setView([15.5527,48.5164],6);
+L.control.zoom({position:'bottomleft'}).addTo(map);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; THE LAST EMPIRE',
+    maxZoom:12,
+    minZoom:5
+}).addTo(map);
+
+const regions = [
+    {name:"العاصمة الملكية المركزية",coords:[15.3694,44.1910],color:"#e74c3c",control:"سيطرة الإمبراطورية"},
+    {name:"محافظة الشمال الاستراتيجية",coords:[16.8550,43.5500],color:"#f39c12",control:"منطقة استراتيجية"},
+    {name:"محافظة الشرق الاقتصادية",coords:[15.9680,48.7900],color:"#2ecc71",control:"إنتاج الموارد"},
+    {name:"محافظة الجنوب الساحلية",coords:[12.7937,45.0351],color:"#3498db",control:"قاعدة ساحلية"}
+];
+
+regions.forEach(reg=>{
+    const circle=L.circleMarker(reg.coords,{
+        radius:14,color:'#fff',weight:2,
+        fillColor:reg.color,fillOpacity:.9
+    }).addTo(map);
+
+    circle.bindPopup(`<b>${reg.name}</b><br><span style="color:#bbb">الحالة:</span> ${reg.control}`);
+
+    circle.on('click',()=>{
+        document.getElementById('selected-region').innerHTML=
+        `<b style="color:var(--accent-gold)">${reg.name}</b><br>${reg.control}`;
+    });
+});
+
+function upgradePalace() {
+    if(resources.gold>=1000) {
+        resources.gold-=1000;
+        stats.palaceLvl++;
+        stats.power+=500;
+        updateUI();
+        saveGameData();
+        alert("✨ تم ترقية القصر الملكي بنجاح!");
+    } else {
+        alert("⚠️ تحتاج إلى 1000 مال.");
+    }
+}
+
+function buildAirport() {
+    if(resources.oil>=600) {
+        resources.oil-=600;
+        stats.airports++;
+        stats.airforce+=120;
+        stats.power+=350;
+        updateUI();
+        saveGameData();
+        alert("✈️ تم إنشاء مطار جديد!");
+    } else {
+        alert("⚠️ تحتاج إلى 600 نفط.");
+    }
+}
+
+function openAlliance() {
+    alert("🌐 نظام التحالفات قيد التطوير.");
+}
+
+function openLeaders() {
+    alert("🎖️ غرفة القادة قيد التطوير.");
+}
+
+updateUI();
+</script><script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
 
 import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  updateProfile
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    updateProfile
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
 import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  serverTimestamp
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCa5CpBhOs23W2_ElHFf3Z1OhOm6OFA6Vs",
-  authDomain: "arab-empires-d2bef.firebaseapp.com",
-  databaseURL: "https://arab-empires-d2bef-default-rtdb.firebaseio.com",
-  projectId: "arab-empires-d2bef",
-  storageBucket: "arab-empires-d2bef.firebasestorage.app",
-  messagingSenderId: "858076630183",
-  appId: "1:858076630183:web:d7c01eb49a06216a2e5f82",
-  measurementId: "G-X45J3E995D"
+    apiKey:"AIzaSyCa5CpBhOs23W2_ElHFf3Z1OhOm6OFA6Vs",
+    authDomain:"arab-empires-d2bef.firebaseapp.com",
+    databaseURL:"https://arab-empires-d2bef-default-rtdb.firebaseio.com",
+    projectId:"arab-empires-d2bef",
+    storageBucket:"arab-empires-d2bef.firebasestorage.app",
+    messagingSenderId:"858076630183",
+    appId:"1:858076630183:web:d7c01eb49a06216a2e5f82",
+    measurementId:"G-X45J3E995D"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-let currentPlayer = null;
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
 
-window.saveGameData = async function () {
-    if (!currentPlayer) return;
+let currentPlayer=null;
+
+window.saveGameData=async function() {
+    if(!currentPlayer) return;
 
     try {
-        await setDoc(
-            doc(db, "players", currentPlayer.uid),
-            {
-                gold: resources.gold,
-                oil: resources.oil,
-                iron: resources.iron,
-                wood: resources.wood,
-                power: stats.power,
-                airforce: stats.airforce,
-                palaceLvl: stats.palaceLvl,
-                airports: stats.airports,
-                updatedAt: serverTimestamp()
-            },
-            { merge: true }
-        );
+        await setDoc(doc(db,"players",currentPlayer.uid),{
+            gold:resources.gold,
+            oil:resources.oil,
+            iron:resources.iron,
+            wood:resources.wood,
+            power:stats.power,
+            airforce:stats.airforce,
+            palaceLvl:stats.palaceLvl,
+            airports:stats.airports,
+            updatedAt:serverTimestamp()
+        },{merge:true});
 
         console.log("تم حفظ اللعبة بنجاح");
-    } catch (error) {
-        console.error("خطأ في الحفظ:", error);
-        alert("تعذر حفظ اللعبة: " + error.message);
+    } catch(error) {
+        console.error("خطأ في الحفظ:",error);
+        alert("تعذر حفظ اللعبة: "+error.message);
     }
 };
 
-window.registerPlayer = async function () {
-  const name = document.getElementById("player-name").value.trim();
-  const email = document.getElementById("player-email").value.trim();
-  const password = document.getElementById("player-password").value;
+async function loadGameData(user) {
+    const ref=doc(db,"players",user.uid);
+    const snapshot=await getDoc(ref);
 
-  if (!name || !email || password.length < 6) {
-    document.getElementById("login-message").innerText =
-      "أدخل الاسم والبريد وكلمة مرور من 6 أحرف على الأقل.";
-    return;
-  }
+    if(!snapshot.exists()) {
+        await setDoc(ref,{
+            username:user.displayName || "قائد جديد",
+            gold:8500,
+            oil:3400,
+            iron:2100,
+            wood:4000,
+            power:7400,
+            airforce:350,
+            palaceLvl:2,
+            airports:2,
+            level:1,
+            experience:0,
+            createdAt:serverTimestamp()
+        },{merge:true});
+        return;
+    }
 
-  try {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(result.user, { displayName: name });
+    const data=snapshot.data();
 
-    await setDoc(doc(db, "players", result.user.uid), {
-      username: name,
-      gold: 8500,
-      oil: 3400,
-      iron: 2100,
-      wood: 4000,
-      level: 1,
-      experience: 0,
-      createdAt: serverTimestamp()
-    });
+    resources.gold=Number(data.gold ?? 8500);
+    resources.oil=Number(data.oil ?? 3400);
+    resources.iron=Number(data.iron ?? 2100);
+    resources.wood=Number(data.wood ?? 4000);
 
-  } catch (error) {
-    document.getElementById("login-message").innerText =
-      "تعذر إنشاء الحساب: " + error.message;
-  }
-};
+    stats.power=Number(data.power ?? 7400);
+    stats.airforce=Number(data.airforce ?? 350);
+    stats.palaceLvl=Number(data.palaceLvl ?? 2);
+    stats.airports=Number(data.airports ?? 2);
 
-window.loginPlayer = async function () {
-  const email = document.getElementById("player-email").value.trim();
-  const password = document.getElementById("player-password").value;
+    updateUI();
+}
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (error) {
-    document.getElementById("login-message").innerText =
-      "تعذر تسجيل الدخول: " + error.message;
-  }
-};
+window.registerPlayer=async function() {
+    const name=document.getElementById("player-name").value.trim();
+    const email=document.getElementById("player-email").value.trim();
+    const password=document.getElementById("player-password").value;
+    const message=document.getElementById("login-message");
 
-onAuthStateChanged(auth, async user => {
-  const box = document.getElementById("login-box");
-  currentPlayer = user;
-
-  if (user) {
-    box.style.display = "none";
+    if(!name || !email || password.length<6) {
+        message.innerText="أدخل الاسم والبريد وكلمة مرور من 6 أحرف على الأقل.";
+        return;
+    }
 
     try {
-      const playerRef = doc(db, "players", user.uid);
-      const playerSnap = await getDoc(playerRef);
+        const result=await createUserWithEmailAndPassword(auth,email,password);
+        await updateProfile(result.user,{displayName:name});
 
-      if (playerSnap.exists()) {
-        const data = playerSnap.data();
+        await setDoc(doc(db,"players",result.user.uid),{
+            username:name,
+            gold:8500,
+            oil:3400,
+            iron:2100,
+            wood:4000,
+            power:7400,
+            airforce:350,
+            palaceLvl:2,
+            airports:2,
+            level:1,
+            experience:0,
+            createdAt:serverTimestamp()
+        });
 
-        resources.gold = data.gold ?? 8500;
-        resources.oil = data.oil ?? 3400;
-        resources.iron = data.iron ?? 2100;
-        resources.wood = data.wood ?? 4000;
-
-        stats.power = data.power ?? 7400;
-        stats.airforce = data.airforce ?? 350;
-        stats.palaceLvl = data.palaceLvl ?? 2;
-        stats.airports = data.airports ?? 2;
-
-        updateUI();
-        console.log("تم تحميل بيانات القائد بنجاح");
-      }
-    } catch (error) {
-      console.error("خطأ في تحميل البيانات:", error);
-      alert("تعذر تحميل بياناتك: " + error.message);
+        message.innerText="تم إنشاء الحساب بنجاح!";
+    } catch(error) {
+        message.innerText="تعذر إنشاء الحساب: "+error.message;
     }
+};
 
-  } else {
-    box.style.display = "flex";
-  }
+window.loginPlayer=async function() {
+    const email=document.getElementById("player-email").value.trim();
+    const password=document.getElementById("player-password").value;
+    const message=document.getElementById("login-message");
+
+    try {
+        await signInWithEmailAndPassword(auth,email,password);
+    } catch(error) {
+        message.innerText="تعذر تسجيل الدخول: "+error.message;
+    }
+};
+
+onAuthStateChanged(auth,async user=>{
+    const box=document.getElementById("login-box");
+    currentPlayer=user;
+
+    if(user) {
+        try {
+            await loadGameData(user);
+            box.style.display="none";
+            console.log("مرحباً بالقائد:",user.displayName);
+        } catch(error) {
+            currentPlayer=null;
+            box.style.display="flex";
+            document.getElementById("login-message").innerText=
+                "تعذر تحميل البيانات: "+error.message;
+            console.error(error);
+        }
+    } else {
+        box.style.display="flex";
+    }
 });
-  }
-});
-</script>
+</script></body>
 </html>
