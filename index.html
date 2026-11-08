@@ -415,9 +415,44 @@ window.loginPlayer = async function () {
       "تعذر تسجيل الدخول: " + error.message;
   }
 };
-
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async user => {
   const box = document.getElementById("login-box");
+  currentPlayer = user;
+
+  if (user) {
+    box.style.display = "none";
+
+    try {
+      const playerRef = doc(db, "players", user.uid);
+      const playerSnap = await getDoc(playerRef);
+
+      if (playerSnap.exists()) {
+        const data = playerSnap.data();
+
+        resources.gold = data.gold ?? 8500;
+        resources.oil = data.oil ?? 3400;
+        resources.iron = data.iron ?? 2100;
+        resources.wood = data.wood ?? 4000;
+
+        stats.power = data.power ?? 7400;
+        stats.airforce = data.airforce ?? 350;
+        stats.palaceLvl = data.palaceLvl ?? 2;
+        stats.airports = data.airports ?? 2;
+
+        updateUI();
+        console.log("تم تحميل بيانات القائد بنجاح");
+      }
+    } catch (error) {
+      console.error("خطأ في تحميل البيانات:", error);
+      alert("تعذر تحميل بياناتك: " + error.message);
+    }
+
+  } else {
+    box.style.display = "flex";
+  }
+});
+
+ document.getElementById("login-box");
 currentPlayer = user;
   if (user) {
     box.style.display = "none";
