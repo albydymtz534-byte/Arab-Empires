@@ -415,6 +415,7 @@ window.loginPlayer = async function () {
       "تعذر تسجيل الدخول: " + error.message;
   }
 };
+
 onAuthStateChanged(auth, async user => {
   const box = document.getElementById("login-box");
   currentPlayer = user;
@@ -451,14 +452,6 @@ onAuthStateChanged(auth, async user => {
     box.style.display = "flex";
   }
 });
-
- document.getElementById("login-box");
-currentPlayer = user;
-  if (user) {
-    box.style.display = "none";
-    console.log("مرحباً بالقائد:", user.displayName);
-  } else {
-    box.style.display = "flex";
   }
 });
 </script>
